@@ -1,0 +1,16 @@
+{
+  "name": "CBN Rapports — Cité de la Bonne Nouvelle",
+  "short_name": "CBN Rapports",
+  "description": "Rapports des cultes de la Cité de la Bonne Nouvelle",
+  "lang": "fr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#2A1240",
+  "theme_color": "#2A1240",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}
