@@ -106,6 +106,7 @@
     if (etat.profil.doit_changer_mdp) return ecranPremiereConnexion();
 
     const estApotre = ['apotre', 'admin'].includes(etat.profil.role);
+    if (route === '/profil') return ecranProfil();
     const m = route.match(/^\/rapport\/([0-9a-f-]{36})$/);
     if (m) return ecranDetail(m[1]);
     if (route === '/nouveau' && !estApotre) return ecranFormulaire();
@@ -313,9 +314,8 @@
       <div class="hero haut">
         <div class="hero-ligne">
           <div class="hero-identite">
-            <button class="avatar" id="btn-photo" aria-label="Changer ma photo">${p.photo_url ? `<img src="${esc(p.photo_url)}" alt="">` : esc(initiales(p.nom))}<span class="badge">${ICONES.photo}</span></button>
-            <input class="visuellement-cache" id="fichier-photo" type="file" accept="image/*">
-            <div><div class="hero-petit">Bonjour,</div><div class="hero-nom">${esc(p.nom)}</div></div>
+            ${lienProfil(p)}
+            <a href="#/profil" class="lien-profil"><div class="hero-petit">Bonjour,</div><div class="hero-nom">${esc(p.nom)}</div><div class="hero-petit souligne">Mon profil</div></a>
           </div>
           <button class="bouton-rond" id="sortir" aria-label="Se déconnecter">${ICONES.sortir}</button>
         </div>
@@ -336,9 +336,99 @@
       </div>`);
 
     document.getElementById('sortir').onclick = deconnexion;
-    document.getElementById('btn-photo').onclick = () => document.getElementById('fichier-photo').click();
-    document.getElementById('fichier-photo').onchange = (e) => changerPhoto(e.target.files[0], document.getElementById('btn-photo'))
-      .then(() => router());
+  }
+
+  // Avatar cliquable qui mène à « Mon profil »
+  function lienProfil(p) {
+    return `<a class="avatar" href="#/profil" aria-label="Mon profil">${p.photo_url ? `<img src="${esc(p.photo_url)}" alt="">` : esc(initiales(p.nom))}<span class="badge">${ICONES.photo}</span></a>`;
+  }
+
+  function telephoneLisible(t) {
+    const c = String(t || '').replace(/\D/g, '');
+    const local = c.startsWith('237') ? c.slice(3) : c;
+    return '+237 ' + local.replace(/^(\d{3})(\d{2})(\d{2})(\d{2})$/, '$1 $2 $3 $4');
+  }
+
+  // ================= Mon profil =================
+
+  function ecranProfil() {
+    const p = etat.profil;
+    const estApotre = ['apotre', 'admin'].includes(p.role);
+    const fonction = estApotre ? 'Apôtre · Superviseur général' : 'Pasteur · ' + (p.eglises ? p.eglises.nom : '');
+    afficher(`
+      <div class="hero">
+        <div class="hero-ligne">
+          <a class="bouton-rond" href="#/" aria-label="Retour">${ICONES.retour}</a>
+          <button class="bouton-rond" id="sortir" aria-label="Se déconnecter">${ICONES.sortir}</button>
+        </div>
+        <h1>Mon profil</h1>
+      </div>
+      <div class="contenu">
+        <section class="carte profil-tete">
+          <span class="apercu-grand" id="apercu">${p.photo_url ? `<img src="${esc(p.photo_url)}" alt="">` : esc(initiales(p.nom))}</span>
+          <div class="profil-nom">${esc(p.nom)}</div>
+          <div class="discret">${esc(fonction)}</div>
+          <div class="deux-colonnes boutons-photo" style="width:100%">
+            <label class="btn secondaire" for="fichier-photo">Changer la photo</label>
+            <button class="btn secondaire" id="retirer-photo" ${p.photo_url ? '' : 'disabled'}>Retirer la photo</button>
+          </div>
+          <input class="visuellement-cache" id="fichier-photo" type="file" accept="image/*">
+        </section>
+
+        <section class="carte paires">
+          <div class="paire"><span>Téléphone</span><strong style="white-space:nowrap">${esc(telephoneLisible(p.telephone))}</strong></div>
+          <div class="paire"><span>${estApotre ? 'Rôle' : 'Église'}</span><strong>${esc(estApotre ? 'Apôtre' : (p.eglises ? p.eglises.nom : ''))}</strong></div>
+        </section>
+        <p class="discret" style="margin:0 4px">Pour changer votre nom ou votre numéro, contactez l’administrateur de la CBN.</p>
+
+        <form class="carte" id="form-mdp" novalidate>
+          <h2>Changer le mot de passe</h2>
+          <div class="champ"><label for="actuel">Mot de passe actuel</label>
+            <input class="saisie" id="actuel" type="password" autocomplete="current-password"></div>
+          <div class="champ"><label for="nouveau">Nouveau mot de passe</label>
+            <input class="saisie" id="nouveau" type="password" autocomplete="new-password" placeholder="Au moins 6 caractères"></div>
+          <div class="champ"><label for="confirmer">Confirmer le nouveau mot de passe</label>
+            <input class="saisie" id="confirmer" type="password" autocomplete="new-password"></div>
+          <p class="erreur" id="erreur" hidden></p>
+          <button class="btn" type="submit" id="btn-mdp">Enregistrer le mot de passe</button>
+        </form>
+
+        <button class="btn secondaire" id="sortir-bas">Se déconnecter</button>
+      </div>`);
+
+    document.getElementById('sortir').onclick = deconnexion;
+    document.getElementById('sortir-bas').onclick = deconnexion;
+    document.getElementById('fichier-photo').onchange = (e) =>
+      changerPhoto(e.target.files[0], document.getElementById('apercu')).then(() => { if (etat.profil.photo_url) document.getElementById('retirer-photo').disabled = false; });
+    document.getElementById('retirer-photo').onclick = async () => {
+      const r = await sb.from('profils').update({ photo_url: null }).eq('id', p.id);
+      if (r.error) return toast(messageErreur(r.error));
+      etat.profil.photo_url = null;
+      toast('Photo retirée');
+      ecranProfil();
+    };
+
+    document.getElementById('form-mdp').onsubmit = async (e) => {
+      e.preventDefault();
+      const actuel = document.getElementById('actuel').value;
+      const n = document.getElementById('nouveau').value;
+      const c = document.getElementById('confirmer').value;
+      const erreur = document.getElementById('erreur');
+      const btn = document.getElementById('btn-mdp');
+      const montrer = (m) => { erreur.textContent = m; erreur.hidden = false; };
+      erreur.hidden = true;
+      if (!actuel) return montrer('Entrez votre mot de passe actuel.');
+      if (n.length < 6) return montrer('Le nouveau mot de passe doit contenir au moins 6 caractères.');
+      if (n !== c) return montrer('Les deux nouveaux mots de passe ne sont pas identiques.');
+      btn.disabled = true; btn.textContent = 'Vérification…';
+      const verif = await sb.auth.signInWithPassword({ email: emailDepuisTelephone(p.telephone), password: actuel });
+      if (verif.error) { btn.disabled = false; btn.textContent = 'Enregistrer le mot de passe'; return montrer(/Invalid login/i.test(verif.error.message) ? 'Le mot de passe actuel est incorrect.' : messageErreur(verif.error)); }
+      const r = await sb.auth.updateUser({ password: n });
+      btn.disabled = false; btn.textContent = 'Enregistrer le mot de passe';
+      if (r.error) return montrer(messageErreur(r.error));
+      e.target.reset();
+      toast('Mot de passe changé');
+    };
   }
 
   // ================= 4. Formulaire du rapport =================
@@ -472,7 +562,7 @@
       <div class="hero">
         <div class="hero-ligne">
           <div class="marque">${logoRond()}<span>Cité de la Bonne Nouvelle</span></div>
-          <button class="bouton-rond" id="sortir" aria-label="Se déconnecter">${ICONES.sortir}</button>
+          <div class="hero-identite">${lienProfil(etat.profil)}<button class="bouton-rond" id="sortir" aria-label="Se déconnecter">${ICONES.sortir}</button></div>
         </div>
         <div><div class="hero-petit">Bonjour, ${esc(etat.profil.nom)}</div><h1 style="font-size:28px">Rapports du dimanche</h1></div>
         <div class="selecteur">

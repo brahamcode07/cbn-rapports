@@ -1,6 +1,6 @@
 // Permet d'installer l'application et de l'ouvrir rapidement.
 // Les données (rapports) viennent toujours d'Internet, jamais du cache.
-const VERSION = 'cbn-v1';
+const VERSION = 'cbn-v2';
 const FICHIERS = [
   './', 'index.html', 'style.css', 'config.js', 'app.js',
   'manifest.webmanifest', 'icon-192.png', 'icon-512.png'
