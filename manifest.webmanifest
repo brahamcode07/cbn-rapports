@@ -1,7 +1,7 @@
 {
-  "name": "CBN Rapports — Cité de la Bonne Nouvelle",
-  "short_name": "CBN Rapports",
-  "description": "Rapports des cultes de la Cité de la Bonne Nouvelle",
+  "name": "CBN — Cité de la Bonne Nouvelle",
+  "short_name": "CBN",
+  "description": "Prédications, méditations, programmes et vie des églises de la Cité de la Bonne Nouvelle",
   "lang": "fr",
   "start_url": "./",
   "scope": "./",

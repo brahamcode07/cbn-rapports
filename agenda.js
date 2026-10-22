@@ -23,7 +23,8 @@
   }
 
   function texteWhatsApp(ev) {
-    return [`*${ev.titre}*`, `${TYPES[ev.type]} · ${C.nomEglise(ev.eglise_id)}`, quand(ev), ev.lieu ? 'Lieu : ' + ev.lieu : '', ev.description, '', 'Tous les programmes de la Cité de la Bonne Nouvelle : ' + ADRESSE()]
+    return [`*${ev.titre}*`, `${TYPES[ev.type]} · ${C.nomEglise(ev.eglise_id)}`, quand(ev), ev.lieu ? 'Lieu : ' + ev.lieu : '', ev.description, '',
+      ev.inscriptions ? 'Inscription : ' + location.origin + location.pathname + '#/inscription/' + ev.id : 'Tous les programmes de la Cité de la Bonne Nouvelle : ' + ADRESSE()]
       .filter((l, i) => l || i === 5).join('\n');
   }
 
@@ -37,7 +38,9 @@
         <p class="discret">${esc(quand(ev))}${ev.lieu ? '<br>' + esc(ev.lieu) : ''}</p>
         ${ev.description ? `<p class="texte-libre">${esc(ev.description)}</p>` : ''}
         <div class="evenement-actions">
+          ${ev.inscriptions && !gerer ? `<a class="btn petit" href="#/inscription/${ev.id}">${ICONES.coche} S’inscrire</a>` : ''}
           <a class="btn whatsapp petit" href="https://wa.me/?text=${encodeURIComponent(texteWhatsApp(ev))}" target="_blank" rel="noopener">${ICONES.whatsapp} Partager</a>
+          ${gerer && ev.inscriptions ? `<a class="btn secondaire petit" href="#/agenda/${ev.id}/inscrits">${ICONES.membres} Inscrits</a>` : ''}
           ${gerer && C.peutPublier(ev.eglise_id) ? `<a class="btn secondaire petit" href="#/agenda/${ev.id}">${ICONES.crayon} Modifier</a>` : ''}
         </div>
       </div>
@@ -65,25 +68,114 @@
     const { evenements, erreur } = await charger(C.aujourdhuiISO());
     const dessiner = () => {
       const f = ecranPublic.filtre || '';
-      app().innerHTML = `
-        <div class="hero public">
-          <div class="hero-ligne"><div class="marque">${C.logoRond()}<span>Cité de la Bonne Nouvelle</span></div>
-            <a class="lien-discret" href="#/">Espace pasteurs</a></div>
-          <div><h1>Programmes et annonces</h1><p>Cultes, programmes, retraites et conventions de nos églises de Mbouda, Galim, Babeté et Bafoussam.</p></div>
-        </div>
+      const y = window.scrollY;
+      afficher(`
+        ${C.heroFideles('Programmes et annonces', { sousTitre: 'Cultes, programmes, retraites et conventions de nos églises de Mbouda, Galim, Babeté et Bafoussam.' })}
         <div class="contenu">
           ${puces(f)}
           ${erreur ? `<p class="erreur">${esc(messageErreur(erreur))}</p>` : ''}
           ${listeParMois(filtrer(evenements, f), false)}
           <p class="discret" style="text-align:center">Partagez cette page : ${esc(ADRESSE())}</p>
-        </div>`;
-      document.body.classList.remove('avec-onglets');
+        </div>`, 'programmes', 'fideles');
+      window.scrollTo(0, y);
       document.querySelectorAll('[data-eglise]').forEach((b) => { b.onclick = () => { ecranPublic.filtre = b.dataset.eglise; dessiner(); }; });
     };
     dessiner();
     window.scrollTo(0, 0);
   }
-  const app = () => document.getElementById('app');
+
+  // ================= Inscription à un programme (sans compte) =================
+
+  async function ecranInscription({ id }) {
+    const [{ data: ev }, eglises] = await Promise.all([sb.from('evenements').select('*').eq('id', id).maybeSingle(), C.eglisesPubliques()]);
+    const ouvert = ev && ev.inscriptions && (ev.date_fin || ev.date_debut) >= C.aujourdhuiISO();
+    if (!ouvert) {
+      afficher(`${C.heroFideles('Inscription', { retour: '#/programmes' })}<div class="contenu"><p class="vide">${ev ? 'Les inscriptions à ce programme sont fermées.' : 'Ce programme n’existe plus.'}</p></div>`, 'programmes', 'fideles');
+      return;
+    }
+    afficher(`
+      ${C.heroFideles('Inscription', { retour: '#/programmes', sousTitre: esc(ev.titre) + ' · ' + esc(quand(ev)) })}
+      <form class="contenu" id="form-ins" novalidate>
+        <section class="carte">
+          <div class="champ"><label for="i-nom">Nom et prénom</label><input class="saisie" id="i-nom" maxlength="100" autocomplete="name"></div>
+          <div class="champ"><label for="i-tel">Téléphone ou WhatsApp</label>
+            <div class="groupe"><span class="prefixe">+237</span><input id="i-tel" type="tel" inputmode="tel" maxlength="20" placeholder="6XX XX XX XX"></div></div>
+          <div class="champ"><label for="i-eglise">Votre église</label>
+            <select class="saisie" id="i-eglise"><option value="">Autre église / aucune</option>${eglises.map((e) => `<option value="${e.id}" ${ev.eglise_id === e.id ? 'selected' : ''}>${esc(e.nom)}</option>`).join('')}</select></div>
+          <div class="compteur"><label for="i-nombre">Nombre de personnes</label>
+            <div class="commandes"><button type="button" data-n="-1" aria-label="Une personne de moins">−</button><input id="i-nombre" type="number" min="1" max="50" value="1" inputmode="numeric"><button type="button" data-n="1" aria-label="Une personne de plus">+</button></div></div>
+        </section>
+        <p class="erreur" id="erreur" hidden></p>
+        <button class="btn" type="submit" id="btn-ins">${ICONES.coche} Je m’inscris</button>
+      </form>`, 'programmes', 'fideles');
+    const nb = document.getElementById('i-nombre');
+    document.querySelectorAll('[data-n]').forEach((b) => { b.onclick = () => { nb.value = Math.min(50, Math.max(1, (parseInt(nb.value, 10) || 1) + Number(b.dataset.n))); }; });
+    document.getElementById('form-ins').onsubmit = async (e) => {
+      e.preventDefault();
+      const erreur = document.getElementById('erreur');
+      const montrer = (t) => { erreur.textContent = t; erreur.hidden = false; };
+      const nom = document.getElementById('i-nom').value.trim();
+      const tel = document.getElementById('i-tel').value.replace(/[^\d+]/g, '');
+      if (nom.length < 2) return montrer('Indiquez votre nom.');
+      if (tel.replace(/\D/g, '').length < 9) return montrer('Indiquez un numéro de téléphone (9 chiffres).');
+      const btn = document.getElementById('btn-ins');
+      btn.disabled = true; btn.textContent = 'Envoi…';
+      const r = await sb.from('inscriptions').insert({ evenement_id: ev.id, nom, telephone: C.telephoneInternational(tel), eglise_id: document.getElementById('i-eglise').value || null, nombre: Math.min(50, Math.max(1, parseInt(nb.value, 10) || 1)) });
+      if (r.error) { btn.disabled = false; btn.innerHTML = ICONES.coche + ' Réessayer'; return montrer(messageErreur(r.error)); }
+      afficher(`
+        ${C.heroFideles('Inscription reçue', { sousTitre: esc(ev.titre) })}
+        <div class="contenu">
+          <section class="carte flottante merci">
+            <div class="icone-ligne grande">${ICONES.coche}</div>
+            <div class="grand-titre">À bientôt, ${esc(nom.split(' ')[0])} !</div>
+            <p class="discret">${esc(quand(ev))}${ev.lieu ? ' · ' + esc(ev.lieu) : ''}</p>
+          </section>
+          <a class="btn whatsapp" href="https://wa.me/?text=${encodeURIComponent(texteWhatsApp(ev))}" target="_blank" rel="noopener">${ICONES.whatsapp} Inviter quelqu’un</a>
+          <a class="btn lien" href="#/programmes">Voir les autres programmes</a>
+        </div>`, 'programmes', 'fideles');
+    };
+  }
+
+  // ================= Liste des inscrits (gestion) =================
+
+  async function ecranInscrits({ id }) {
+    const [{ data: ev }, { data: liste, error }] = await Promise.all([
+      sb.from('evenements').select('*').eq('id', id).maybeSingle(),
+      sb.from('inscriptions').select('*').eq('evenement_id', id).order('created_at')
+    ]);
+    if (!ev) return aller('/agenda');
+    const total = (liste || []).reduce((s, i) => s + (i.nombre || 1), 0);
+    const peutGerer = C.peutPublier(ev.eglise_id);
+    afficher(`
+      ${C.hero('Inscrits', { retour: '#/agenda', sousTitre: esc(ev.titre) + ' · ' + esc(quand(ev)) })}
+      <div class="contenu">
+        <div class="tuiles trois">
+          <div class="tuile"><span>Inscriptions</span><strong>${(liste || []).length}</strong></div>
+          <div class="tuile"><span>Personnes</span><strong>${total}</strong></div>
+          <div class="tuile"><span>Statut</span><strong>${ev.inscriptions ? 'Ouvert' : 'Fermé'}</strong></div>
+        </div>
+        ${(liste || []).length ? '<button class="btn secondaire" id="excel">Exporter en Excel</button>' : ''}
+        ${error ? `<p class="erreur">${esc(messageErreur(error))}</p>` : ''}
+        <div class="liste serree">${(liste || []).length ? liste.map((i) => `
+          <div class="ligne">
+            <span class="corps"><strong>${esc(i.nom)}${i.nombre > 1 ? ' · ' + i.nombre + ' pers.' : ''}</strong><span>${esc(C.telephoneLisible(i.telephone))} · ${esc(i.eglise_id ? C.nomEglise(i.eglise_id) : 'Autre église')}</span></span>
+            ${i.telephone ? `<a class="bouton-suppr" href="${esc(C.lienWhatsApp(i.telephone, 'Bonjour ' + i.nom.split(' ')[0] + ', votre inscription à « ' + ev.titre + ' » est bien enregistrée.'))}" target="_blank" rel="noopener" aria-label="WhatsApp">${ICONES.whatsapp}</a>` : ''}
+            ${peutGerer ? `<button class="bouton-suppr" data-suppr="${i.id}" aria-label="Supprimer l’inscription">×</button>` : ''}
+          </div>`).join('') : '<p class="vide">Aucune inscription pour le moment. Partagez le programme sur WhatsApp : le lien d’inscription est inclus.</p>'}</div>
+      </div>`, 'agenda');
+    const x = document.getElementById('excel');
+    if (x) x.onclick = () => {
+      const feuille = XLSX.utils.json_to_sheet(liste.map((i) => ({ Nom: i.nom, Téléphone: C.telephoneLisible(i.telephone), Église: i.eglise_id ? C.nomEglise(i.eglise_id) : 'Autre', Personnes: i.nombre, 'Inscrit le': new Date(i.created_at).toLocaleString('fr-FR') })));
+      const classeur = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(classeur, feuille, 'Inscrits');
+      XLSX.writeFile(classeur, 'CBN-inscrits-' + ev.titre.replace(/[^\w]+/g, '-') + '.xlsx');
+    };
+    document.querySelectorAll('[data-suppr]').forEach((b) => C.boutonConfirme(b, async () => {
+      const r = await sb.from('inscriptions').delete().eq('id', b.dataset.suppr);
+      if (r.error) return toast(messageErreur(r.error));
+      ecranInscrits({ id });
+    }, 'Sûr ?'));
+  }
 
   // ================= Gestion des programmes (connecté) =================
 
@@ -95,7 +187,7 @@
       <div class="contenu">
         <div class="deux-colonnes">
           <a class="btn" href="#/agenda/nouveau">${ICONES.plus} Ajouter</a>
-          <a class="btn secondaire" href="#/programmes">${ICONES.globe} Page publique</a>
+          <a class="btn secondaire" href="#/programmes">${ICONES.globe} Vue des fidèles</a>
         </div>
         ${puces(f)}
         ${erreur ? `<p class="erreur">${esc(messageErreur(erreur))}</p>` : ''}
@@ -133,6 +225,7 @@
             <div class="champ"><label for="e-lieu">Lieu</label><input class="saisie" id="e-lieu" value="${esc(v.lieu)}" placeholder="Ex. : Temple de Mbouda"></div>
           </div>
           <div class="champ"><label for="e-desc">Description</label><textarea class="saisie" id="e-desc" placeholder="Orateur, thème, contribution, consignes…">${esc(v.description)}</textarea></div>
+          <label class="interrupteur"><input type="checkbox" id="e-ins" ${v.inscriptions ? 'checked' : ''}><span><strong>Inscriptions en ligne</strong><small>Les fidèles s’inscrivent depuis l’application, vous recevez la liste.</small></span></label>
           <p class="erreur" id="erreur" hidden></p>
           <button class="btn" type="submit" id="btn-ev">${ICONES.coche} ${ev ? 'Enregistrer' : 'Publier'}</button>
         </form>
@@ -146,7 +239,7 @@
       const montrer = (m) => { erreur.textContent = m; erreur.hidden = false; };
       const donnees = {
         type: val('e-type'), titre: val('e-titre'), date_debut: val('e-debut'), date_fin: val('e-fin') || null,
-        heure: val('e-heure'), lieu: val('e-lieu'), description: val('e-desc'),
+        heure: val('e-heure'), lieu: val('e-lieu'), description: val('e-desc'), inscriptions: document.getElementById('e-ins').checked,
         eglise_id: apotre ? (val('e-eglise') || null) : etat.profil.eglise_id
       };
       if (!donnees.titre) return montrer('Indiquez le titre du programme.');
@@ -167,6 +260,8 @@
   }
 
   C.route(/^\/programmes$/, ecranPublic, { public: true });
+  C.route(/^\/inscription\/(?<id>[0-9a-f-]{36})$/, ecranInscription, { public: true });
+  C.route(/^\/agenda\/(?<id>[0-9a-f-]{36})\/inscrits$/, ecranInscrits);
   C.route(/^\/agenda$/, ecranAgenda);
   C.route(/^\/agenda\/nouveau$/, () => ecranFormulaire({}));
   C.route(/^\/agenda\/(?<id>[0-9a-f-]{36})$/, ecranFormulaire);

@@ -30,9 +30,18 @@
 
     const courant = (rapports || []).find((r) => r.date_culte === dimanche && r.type_culte === 'dimanche');
     const precedents = (rapports || []).filter((r) => r !== courant);
+    const attente = C.fileAttente().filter((x) => x.table === 'rapports_culte');
+    const courantEnAttente = attente.find((x) => x.op === 'insert' && x.donnees.date_culte === dimanche && x.donnees.type_culte === 'dimanche');
+    const { data: membres } = await sb.from('membres').select('id, nom, telephone, date_naissance').eq('eglise_id', p.eglise_id).not('date_naissance', 'is', null);
+    const fetes = C.anniversairesProches(membres, 7);
 
     let carte;
-    if (!courant) {
+    if (!courant && courantEnAttente) {
+      carte = `<span class="surtitre">En attente de réseau</span>
+        <div class="grand-titre">Culte du dimanche<br>${esc(C.dateLongue(dimanche))}</div>
+        <p class="discret">Le rapport est enregistré sur ce téléphone. Il partira tout seul dès que la connexion reviendra.</p>
+        <button class="btn secondaire" id="reessayer">${ICONES.envoyer} Réessayer maintenant</button>`;
+    } else if (!courant) {
       carte = `<span class="surtitre">Rapport à envoyer</span>
         <div class="grand-titre">Culte du dimanche<br>${esc(C.dateLongue(dimanche))}</div>
         <a class="btn" href="#/nouveau">${ICONES.crayon} Remplir le rapport</a>`;
@@ -55,13 +64,15 @@
             ${C.lienProfil(p)}
             <a href="#/profil" class="lien-profil"><div class="hero-petit">Bonjour,</div><div class="hero-nom">${esc(p.nom)}</div><div class="hero-petit souligne">Mon profil</div></a>
           </div>
-          <button class="bouton-rond" id="sortir" aria-label="Se déconnecter">${ICONES.sortir}</button>
+          ${C.cloche()}
         </div>
         <div class="hero-identite">${C.logoRond()}<h1>${esc(p.eglises ? p.eglises.nom : '')}</h1></div>
       </div>
       <div class="contenu remonte">
         <section class="carte flottante">${carte}</section>
+        ${attente.length && !(attente.length === 1 && courantEnAttente) ? `<div class="info">${ICONES.hors}<span>${attente.length} rapport${attente.length > 1 ? 's' : ''} en attente d’envoi sur ce téléphone. ${navigator.onLine ? '' : 'Ils partiront au retour du réseau.'}</span></div>` : ''}
         <a class="btn secondaire" href="#/nouveau/autre">${ICONES.plus} Rapport d’un autre culte</a>
+        ${fetes.length ? `<a class="ligne fete" href="#/anniversaires"><span class="icone-ligne">${ICONES.gateau}</span><span class="corps"><strong>${fetes.filter((m) => m.dans === 0).length ? 'Anniversaire aujourd’hui : ' + esc(fetes.filter((m) => m.dans === 0).map((m) => m.nom).join(', ')) : fetes.length + ' anniversaire' + (fetes.length > 1 ? 's' : '') + ' cette semaine'}</strong><span>Souhaitez-les par WhatsApp</span></span>${ICONES.suivant}</a>` : ''}
         ${error ? `<p class="erreur">${esc(messageErreur(error))}</p>` : ''}
         <h2 class="titre-section">Rapports précédents</h2>
         <div class="liste">
@@ -69,7 +80,8 @@
         </div>
         ${precedents.length ? '<a class="btn lien" href="#/rapports">Voir tous les rapports</a>' : ''}
       </div>`, 'rapports');
-    document.getElementById('sortir').onclick = C.deconnexion;
+    const btnReessayer = document.getElementById('reessayer');
+    if (btnReessayer) btnReessayer.onclick = () => { if (!navigator.onLine) return toast('Toujours pas de connexion.'); C.envoyerFileAttente(); };
   }
 
   function ligneRapport(r) {
@@ -191,9 +203,20 @@
       if (!contenu.predicateur) { erreur.textContent = 'Indiquez le nom du prédicateur.'; erreur.hidden = false; return; }
       if (!existant && (!dateChoisie || dateChoisie > C.aujourdhuiISO())) { erreur.textContent = 'Choisissez une date qui n’est pas dans le futur.'; erreur.hidden = false; return; }
       btn.disabled = true; btn.textContent = 'Envoi…';
+      const typeChoisi = existant ? existant.type_culte : document.getElementById('type_culte').value;
+      const nouveau = { ...contenu, eglise_id: p.eglise_id, auteur_id: p.id, date_culte: dateChoisie, type_culte: typeChoisi };
+      const garderPourPlusTard = () => {
+        C.mettreEnAttente(existant
+          ? { table: 'rapports_culte', op: 'update', id: existant.id, donnees: contenu, cle: 'maj-' + existant.id, libelle: nomType(existant.type_culte) + ' du ' + C.dateCourte(existant.date_culte) }
+          : { table: 'rapports_culte', op: 'insert', donnees: nouveau, cle: 'rapport-' + typeChoisi + '-' + dateChoisie, libelle: nomType(typeChoisi) + ' du ' + C.dateCourte(dateChoisie) });
+        toast('Pas de réseau : rapport gardé sur le téléphone, il partira tout seul.');
+        aller('/');
+      };
+      if (!navigator.onLine) return garderPourPlusTard();
       const r = existant
         ? await sb.from('rapports_culte').update(contenu).eq('id', existant.id).select('id').single()
-        : await sb.from('rapports_culte').insert({ ...contenu, eglise_id: p.eglise_id, auteur_id: p.id, date_culte: dateChoisie, type_culte: document.getElementById('type_culte').value }).select('id').single();
+        : await sb.from('rapports_culte').insert(nouveau).select('id').single();
+      if (r.error && C.estErreurReseau(r.error)) return garderPourPlusTard();
       if (r.error) {
         erreur.textContent = messageErreur(r.error); erreur.hidden = false;
         btn.disabled = false; btn.innerHTML = ICONES.envoyer + ' Réessayer'; return;
@@ -207,11 +230,21 @@
 
   async function ecranApotre({ date }) {
     const dimanche = date || C.dimancheDeReference();
-    const [{ data: rapports, error }, { data: autres }] = await Promise.all([
+    const mois = C.moisCourant();
+    const [{ data: rapports, error }, { data: autres }, { data: ames }, { count: demandes }, { data: ops }, { data: naissances }] = await Promise.all([
       sb.from('rapports_culte').select('*').eq('date_culte', dimanche).eq('type_culte', 'dimanche'),
       sb.from('rapports_culte').select('id, eglise_id, date_culte, type_culte, statut, created_at, commentaire_apotre')
-        .neq('type_culte', 'dimanche').order('date_culte', { ascending: false }).limit(6)
+        .neq('type_culte', 'dimanche').order('date_culte', { ascending: false }).limit(6),
+      sb.from('membres').select('id, eglise_id, statut, suivis(date_suivi)').in('statut', ['nouveau_converti', 'visiteur']),
+      sb.from('demandes').select('id', { count: 'exact', head: true }).eq('statut', 'nouvelle'),
+      sb.from('transactions').select('type, montant').gte('date_op', mois + '-01').lte('date_op', C.finDeMois(mois)),
+      sb.from('membres').select('id, nom, date_naissance').not('date_naissance', 'is', null)
     ]);
+    const limite = C.ajouterJours(C.aujourdhuiISO(), -7);
+    const aSuivre = (ames || []).filter((m) => !(m.suivis || []).some((s) => s.date_suivi >= limite)).length;
+    const solde = (ops || []).reduce((s, o) => s + (o.type === 'depense' ? -1 : 1) * Number(o.montant), 0);
+    const fetes = C.anniversairesProches(naissances, 7).length;
+    const tuile = (lien, libelle, valeur, note, alerte) => `<a class="tuile lien-tuile${alerte ? ' alerte' : ''}" href="${lien}"><span>${libelle}</span><strong>${valeur}</strong>${note ? `<span class="tendance">${note}</span>` : ''}</a>`;
     const parEglise = new Map((rapports || []).map((r) => [r.eglise_id, r]));
     const recus = etat.eglises.filter((e) => parEglise.has(e.id)).length;
     const estFutur = dimanche >= C.dimancheDeReference();
@@ -220,7 +253,7 @@
       <div class="hero">
         <div class="hero-ligne">
           <div class="marque">${C.logoRond()}<span>Cité de la Bonne Nouvelle</span></div>
-          <div class="hero-identite">${C.lienProfil(etat.profil)}<button class="bouton-rond" id="sortir" aria-label="Se déconnecter">${ICONES.sortir}</button></div>
+          <div class="hero-identite">${C.cloche()}${C.lienProfil(etat.profil)}</div>
         </div>
         <div><div class="hero-petit">Bonjour, ${esc(etat.profil.nom)}</div><h1 style="font-size:28px">Rapports du dimanche</h1></div>
         <div class="selecteur">
@@ -236,6 +269,13 @@
       </div>
       <div class="contenu">
         ${error ? `<p class="erreur">${esc(messageErreur(error))}</p>` : ''}
+        <div class="tuiles deux">
+          ${tuile('#/eglises', 'Âmes à suivre', nombre(aSuivre), 'Sans contact depuis 7 jours', aSuivre > 0)}
+          ${tuile('#/demandes', 'Prières et questions', nombre(demandes || 0), 'Nouvelles', (demandes || 0) > 0)}
+          ${tuile('#/finances-cbn', 'Solde du mois', esc(fcfa(solde)), esc(C.moisLibelle(mois)))}
+          ${tuile('#/anniversaires', 'Anniversaires', nombre(fetes), 'Dans les 7 jours')}
+        </div>
+        <h2 class="titre-section">Rapports du ${esc(C.dateCourte(dimanche))}</h2>
         <div class="liste">
           ${etat.eglises.map((e) => {
             const pasteur = etat.pasteurs.find((x) => x.eglise_id === e.id);
@@ -254,7 +294,6 @@
         <a class="btn lien" href="#/rapports">Voir tous les rapports</a>
       </div>`, 'rapports');
 
-    document.getElementById('sortir').onclick = C.deconnexion;
     if (recus) {
       const liste = etat.eglises.filter((e) => parEglise.has(e.id)).map((e) => ({ eglise: e.nom, ...parEglise.get(e.id) }));
       document.getElementById('export-pdf').onclick = () => exporterPDFListe('Rapports du dimanche', C.dateLongue(dimanche), liste, 'CBN-rapports-' + dimanche);

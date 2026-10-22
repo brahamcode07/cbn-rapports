@@ -134,6 +134,7 @@
           <div class="champ"><label for="m-dep">Département</label><select class="saisie" id="m-dep"><option value="">Aucun</option>${(deps || []).map((d) => `<option value="${d.id}" ${v.departement_id === d.id ? 'selected' : ''}>${esc(d.nom)}</option>`).join('')}</select></div>
           <div class="champ"><label for="m-arrivee">Arrivée à l’église</label><input class="saisie" id="m-arrivee" type="date" value="${esc(v.date_arrivee || '')}"></div>
         </div>
+        <div class="champ"><label for="m-naissance">Date de naissance <span class="discret">(pour souhaiter l’anniversaire)</span></label><input class="saisie" id="m-naissance" type="date" max="${C.aujourdhuiISO()}" value="${esc(v.date_naissance || '')}"></div>
         <div class="champ"><label for="m-formations">Formations suivies</label><textarea class="saisie" id="m-formations" placeholder="Ex. : école de baptême, formation des ouvriers…">${esc(v.formations)}</textarea></div>
         <div class="champ"><label for="m-notes">Notes</label><textarea class="saisie" id="m-notes">${esc(v.notes)}</textarea></div>
         <p class="erreur" id="erreur" hidden></p>
@@ -146,7 +147,8 @@
     const tel = val('m-tel').replace(/\D/g, '');
     return {
       nom: val('m-nom'), telephone: tel ? C.telephoneInternational(tel) : '', sexe: val('m-sexe') || null, statut: val('m-statut'),
-      departement_id: val('m-dep') || null, date_arrivee: val('m-arrivee') || null, formations: val('m-formations'), notes: val('m-notes')
+      departement_id: val('m-dep') || null, date_arrivee: val('m-arrivee') || null, date_naissance: val('m-naissance') || null,
+      formations: val('m-formations'), notes: val('m-notes')
     };
   }
 
@@ -202,6 +204,7 @@
           <div class="paire"><span>Sexe</span><strong>${m.sexe === 'H' ? 'Homme' : m.sexe === 'F' ? 'Femme' : '—'}</strong></div>
           <div class="paire"><span>Département</span><strong>${esc(m.departements ? m.departements.nom : '—')}</strong></div>
           <div class="paire"><span>Arrivée à l’église</span><strong>${m.date_arrivee ? esc(C.dateLongue(m.date_arrivee)) : '—'}</strong></div>
+          <div class="paire"><span>Anniversaire</span><strong>${m.date_naissance ? esc(C.dateCourte(m.date_naissance)) : '—'}</strong></div>
         </section>
         ${m.formations ? `<section class="carte"><h2 class="petit-titre">Formations suivies</h2><p class="texte-libre">${esc(m.formations)}</p></section>` : ''}
         ${m.notes ? `<section class="carte"><h2 class="petit-titre">Notes</h2><p class="texte-libre">${esc(m.notes)}</p></section>` : ''}
@@ -525,6 +528,39 @@
 
   // ================= Routes =================
   const ID = '[0-9a-f-]{36}';
+  // ================= Anniversaires =================
+
+  async function ecranAnniversaires() {
+    const apotre = C.estApotre();
+    let q = sb.from('membres').select('id, nom, telephone, eglise_id, date_naissance').not('date_naissance', 'is', null);
+    if (!apotre) q = q.eq('eglise_id', etat.profil.eglise_id);
+    const [{ data, error }, { count: sansDate }] = await Promise.all([
+      q,
+      apotre ? Promise.resolve({ count: 0 }) : sb.from('membres').select('id', { count: 'exact', head: true }).eq('eglise_id', etat.profil.eglise_id).is('date_naissance', null)
+    ]);
+    const proches = C.anniversairesProches(data, 31);
+    const groupes = [['Aujourd’hui', proches.filter((m) => m.dans === 0)], ['Cette semaine', proches.filter((m) => m.dans > 0 && m.dans <= 7)], ['Dans le mois', proches.filter((m) => m.dans > 7)]];
+    const ligne = (m) => {
+      const prenom = m.nom.split(' ')[0];
+      const eglise = C.nomEglise(m.eglise_id);
+      const message = `Joyeux anniversaire ${prenom} ! 🎉\nToute la famille de la ${eglise} se réjouit avec toi. Que le Seigneur te bénisse et te garde, et que cette nouvelle année soit remplie de sa grâce.\n${etat.profil.nom}`;
+      return `<div class="ligne">
+        <span class="icone-ligne">${ICONES.gateau}</span>
+        <a class="corps lien-corps" href="#/membre/${m.id}"><strong>${esc(m.nom)}</strong><span>${esc(m.dans === 0 ? 'Aujourd’hui' : C.dateJour(m.prochaine))} · ${m.age} ans${apotre ? ' · ' + esc(eglise) : ''}</span></a>
+        ${m.telephone ? `<a class="btn whatsapp petit" href="${esc(C.lienWhatsApp(m.telephone, message))}" target="_blank" rel="noopener" aria-label="Souhaiter par WhatsApp">${ICONES.whatsapp}</a>` : ''}
+      </div>`;
+    };
+    afficher(`
+      ${C.hero('Anniversaires', { retour: '#/plus', sousTitre: apotre ? 'Membres de toutes les églises' : esc(C.nomEglise(etat.profil.eglise_id)) })}
+      <div class="contenu">
+        ${error ? `<p class="erreur">${esc(messageErreur(error))}</p>` : ''}
+        ${groupes.map(([titre, l]) => l.length ? `<h2 class="titre-section">${titre}</h2><div class="liste">${l.map(ligne).join('')}</div>` : '').join('')}
+        ${proches.length ? '' : '<p class="vide">Aucun anniversaire dans les 31 prochains jours.</p>'}
+        ${sansDate ? `<div class="info">${ICONES.info}<span>${sansDate} membre${sansDate > 1 ? 's n’ont' : ' n’a'} pas de date de naissance. Ajoutez-la depuis la fiche du membre (bouton Modifier).</span></div>` : ''}
+      </div>`, 'plus');
+  }
+
+  C.route(/^\/anniversaires$/, ecranAnniversaires);
   C.route(/^\/eglises$/, ecranEglises);
   C.route(new RegExp(`^/eglise/(?<eglise>${ID})$`), ecranEglise);
   C.route(new RegExp(`^/eglise/(?<eglise>${ID})/membres$`), ecranMembres);

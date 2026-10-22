@@ -29,8 +29,8 @@
     coche: svg('<path d="M20 6L9 17l-5-5"/>', 20, 2.2),
     plus: svg('<path d="M12 5v14M5 12h14"/>', 20, 2.2),
     photo: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2A1240" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8h3l2-3h8l2 3h3v12H3z"/><circle cx="12" cy="13" r="3.5"/></svg>',
-    personne: '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#7A63A0" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>',
-    info: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4B2672" stroke-width="1.8" stroke-linecap="round" aria-hidden="true" style="flex:none"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>',
+    personne: '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>',
+    info: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true" style="flex:none;color:var(--accent)"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>',
     rapports: svg('<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/>', 22, 1.8),
     membres: svg('<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c1-3.5 3.6-5.5 6.5-5.5s5.5 2 6.5 5.5"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18.5 14.8c1.6.9 2.6 2.6 3 5.2"/>', 22, 1.8),
     finances: svg('<rect x="2.5" y="6" width="19" height="13" rx="2.5"/><path d="M2.5 10h19M16.5 15h2"/>', 22, 1.8),
@@ -43,6 +43,20 @@
     groupe: svg('<circle cx="12" cy="7" r="3"/><circle cx="5" cy="10" r="2.5"/><circle cx="19" cy="10" r="2.5"/><path d="M7 20c.6-3 2.6-5 5-5s4.4 2 5 5M1.5 19c.3-2 1.6-3.5 3.5-3.5M22.5 19c-.3-2-1.6-3.5-3.5-3.5"/>', 20, 1.8),
     profil: svg('<circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/>', 20, 1.8),
     globe: svg('<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>', 20, 1.8),
+    cloche: svg('<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/>', 20, 1.8),
+    lune: svg('<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>', 20, 1.8),
+    soleil: svg('<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>', 20, 1.8),
+    accueil: svg('<path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/>', 22, 1.8),
+    ecouter: svg('<path d="M3 14v-2a9 9 0 0 1 18 0v2"/><path d="M21 15a2 2 0 0 1-2 2h-1v-6h1a2 2 0 0 1 2 2zM3 15a2 2 0 0 0 2 2h1v-6H5a2 2 0 0 0-2 2z"/>', 22, 1.8),
+    video: svg('<rect x="2.5" y="5.5" width="14" height="13" rx="2.5"/><path d="M16.5 10l5-3v10l-5-3"/>', 20, 1.8),
+    lecture: '<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15l12-7.5z"/></svg>',
+    pause: '<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="4.5" width="4" height="15" rx="1"/><rect x="14" y="4.5" width="4" height="15" rx="1"/></svg>',
+    fermer: svg('<path d="M6 6l12 12M18 6L6 18"/>', 20, 2),
+    livre: svg('<path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v17H6.5A2.5 2.5 0 0 0 4 21.5z"/><path d="M4 21.5A2.5 2.5 0 0 1 6.5 19H20v3H6.5"/><path d="M12 6v6M9 9h6"/>', 22, 1.8),
+    priere: svg('<path d="M12 21s-7.5-4.6-9.4-9.3C1.2 8.3 3.4 4.5 7 4.5c2 0 3.5 1.1 5 3 1.5-1.9 3-3 5-3 3.6 0 5.8 3.8 4.4 7.2C19.5 16.4 12 21 12 21z"/>', 22, 1.8),
+    gateau: svg('<path d="M4 21V12a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v9M2 21h20M4 15c2 1.5 4 1.5 6 0s4-1.5 6 0 4 1.5 4 0M12 10V7"/><path d="M12 3c.8 1 1 1.8 0 3-1-1.2-.8-2 0-3z"/>', 20, 1.8),
+    nuage: svg('<path d="M17.5 19a4.5 4.5 0 1 0-1.4-8.8A6 6 0 1 0 6 16.9"/><path d="M12 12v8M9 17l3 3 3-3"/>', 20, 1.8),
+    hors: svg('<path d="M2 2l20 20M8.5 16.5a5 5 0 0 1 7 0M5 13a10 10 0 0 1 5.2-2.8M19 13a10 10 0 0 0-2.2-1.6M2 8.8a15 15 0 0 1 4.2-2.7M22 8.8A15 15 0 0 0 10.7 5M12 20h.01"/>', 18, 1.8),
     whatsapp: '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.2-.4.7-1.4.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6a2.7 2.7 0 0 0 1.8-1.3 2.2 2.2 0 0 0 .2-1.3c-.1-.1-.2-.2-.5-.3z"/></svg>'
   };
 
@@ -115,12 +129,113 @@
   }
   function logoRond() { return '<span class="logo-rond"><img src="icon-192.png" alt="Logo CBN"></span>'; }
 
+  // Cloche des notifications (le nombre de non lues s'affiche après chargement)
+  function cloche() {
+    return `<a class="bouton-rond cloche" href="#/notifications" aria-label="Notifications">${ICONES.cloche}<span class="compte" hidden></span></a>`;
+  }
+  async function majCloche() {
+    if (!etat.profil) return;
+    const { count } = await sb.from('notifications').select('id', { count: 'exact', head: true }).eq('lu', false);
+    etat.nonLues = count || 0;
+    document.querySelectorAll('.cloche .compte').forEach((s) => {
+      s.textContent = etat.nonLues > 9 ? '9+' : String(etat.nonLues);
+      s.hidden = !etat.nonLues;
+    });
+    document.querySelectorAll('.cloche').forEach((a) => a.setAttribute('aria-label', etat.nonLues ? `Notifications, ${etat.nonLues} non lues` : 'Notifications'));
+  }
+
   // En-tête violet simple : titre, sous-titre, lien retour, bouton à droite
   function hero(titre, { retour, sousTitre, droite, haut } = {}) {
+    const aDroite = droite || (etat.profil ? cloche() : '');
     return `<div class="hero${haut ? ' haut' : ''}">
-      ${retour || droite ? `<div class="hero-ligne">${retour ? `<a class="bouton-rond" href="${retour}" aria-label="Retour">${ICONES.retour}</a>` : '<span></span>'}${droite || ''}</div>` : ''}
+      ${retour || aDroite ? `<div class="hero-ligne">${retour ? `<a class="bouton-rond" href="${retour}" aria-label="Retour">${ICONES.retour}</a>` : '<span></span>'}${aDroite}</div>` : ''}
       <div><h1>${esc(titre)}</h1>${sousTitre ? `<p>${sousTitre}</p>` : ''}</div>
     </div>`;
+  }
+
+  // ================= Apparence (clair / sombre / automatique) =================
+  function themeChoisi() { try { return localStorage.getItem('cbn_theme') || 'auto'; } catch (e) { return 'auto'; } }
+  function appliquerTheme(choix) {
+    try { localStorage.setItem('cbn_theme', choix); } catch (e) { /* stockage indisponible */ }
+    if (choix === 'auto') document.documentElement.removeAttribute('data-theme');
+    else document.documentElement.setAttribute('data-theme', choix === 'sombre' ? 'dark' : 'light');
+    majCouleurNavigateur();
+  }
+  function estSombre() {
+    const t = document.documentElement.getAttribute('data-theme');
+    return t ? t === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+  }
+  function majCouleurNavigateur() {
+    const m = document.querySelector('meta[name="theme-color"]');
+    if (m) m.setAttribute('content', estSombre() ? '#170B24' : '#2A1240');
+  }
+  function basculerTheme() { appliquerTheme(estSombre() ? 'clair' : 'sombre'); }
+  function boutonTheme() {
+    return `<button class="bouton-rond" type="button" data-theme-bascule aria-label="${estSombre() ? 'Passer en mode clair' : 'Passer en mode sombre'}">${estSombre() ? ICONES.soleil : ICONES.lune}</button>`;
+  }
+  function choixApparence() {
+    const c = themeChoisi();
+    return `<div class="segments" role="radiogroup" aria-label="Apparence">
+      ${[['auto', 'Automatique'], ['clair', 'Clair'], ['sombre', 'Sombre']].map(([v, n]) =>
+        `<button type="button" role="radio" aria-checked="${c === v}" class="${c === v ? 'actif' : ''}" data-apparence="${v}">${n}</button>`).join('')}
+    </div>`;
+  }
+
+  // ================= Rapports en attente (hors connexion) =================
+  const CLE_FILE = 'cbn_file_attente';
+  function fileAttente() { try { return JSON.parse(localStorage.getItem(CLE_FILE) || '[]'); } catch (e) { return []; } }
+  function ecrireFile(f) { try { localStorage.setItem(CLE_FILE, JSON.stringify(f)); } catch (e) { /* plein */ } }
+  function mettreEnAttente(element) {
+    const f = fileAttente().filter((x) => !(element.cle && x.cle === element.cle));
+    f.push({ ...element, quand: new Date().toISOString() });
+    ecrireFile(f);
+  }
+  const estErreurReseau = (err) => /Failed to fetch|NetworkError|network|Load failed|fetch/i.test(String((err && err.message) || err || ''));
+  let envoiEnCours = false;
+  async function envoyerFileAttente() {
+    if (envoiEnCours || !navigator.onLine || !etat.profil) return;
+    const f = fileAttente();
+    if (!f.length) return;
+    envoiEnCours = true;
+    let envoyes = 0;
+    const reste = [];
+    for (const el of f) {
+      const r = el.op === 'update'
+        ? await sb.from(el.table).update(el.donnees).eq('id', el.id)
+        : await sb.from(el.table).insert(el.donnees);
+      if (!r.error) envoyes++;
+      else if (estErreurReseau(r.error)) reste.push(el);
+      else toast('Non envoyé (' + el.libelle + ') : ' + messageErreur(r.error));
+    }
+    ecrireFile(reste);
+    envoiEnCours = false;
+    if (envoyes) {
+      toast(envoyes > 1 ? `${envoyes} rapports en attente ont été envoyés` : 'Le rapport en attente a été envoyé');
+      if (/^#?\/?$/.test(location.hash.replace('#', ''))) router();
+    }
+  }
+  function majHorsLigne() {
+    const bandeau = document.getElementById('hors-ligne');
+    if (bandeau) bandeau.hidden = navigator.onLine;
+    if (navigator.onLine) envoyerFileAttente();
+  }
+
+  // ================= Anniversaires =================
+  // Renvoie les membres dont l'anniversaire tombe dans les « jours » prochains (0 = aujourd'hui)
+  function anniversairesProches(membres, jours = 7) {
+    const auj = aujourdhuiISO();
+    const an = Number(auj.slice(0, 4));
+    return (membres || []).filter((m) => m.date_naissance).map((m) => {
+      const md = m.date_naissance.slice(5);
+      let prochaine = an + '-' + md;
+      if (md === '02-29' && !(an % 4 === 0 && (an % 100 !== 0 || an % 400 === 0))) prochaine = an + '-03-01';
+      if (prochaine < auj) prochaine = (an + 1) + '-' + md;
+      return { ...m, prochaine, dans: ecartJours(auj, prochaine), age: Number(prochaine.slice(0, 4)) - Number(m.date_naissance.slice(0, 4)) };
+    }).filter((m) => m.dans <= jours).sort((a, b) => a.dans - b.dans || a.nom.localeCompare(b.nom));
+  }
+  function lienWhatsApp(telephone, texte) {
+    const t = telephoneInternational(telephone);
+    return (t ? 'https://wa.me/' + t : 'https://wa.me/') + '?text=' + encodeURIComponent(texte);
   }
 
   // Un bouton « Supprimer » demande une confirmation sur la page (2e appui)
@@ -138,20 +253,31 @@
     };
   }
 
-  function afficher(html, onglet) {
-    const avecOnglets = Boolean(onglet && etat.profil);
-    app.innerHTML = html + (avecOnglets ? barreOnglets(onglet) : '');
+  function afficher(html, onglet, espace) {
+    const fideles = espace === 'fideles';
+    const avecOnglets = Boolean(onglet && (fideles || etat.profil));
+    app.innerHTML = html + (avecOnglets ? (fideles ? barreFideles(onglet) : barreOnglets(onglet)) : '');
     document.body.classList.toggle('avec-onglets', avecOnglets);
     window.scrollTo(0, 0);
+    if (etat.profil && !fideles) majCloche();
+  }
+
+  // ----- Barre de navigation de l'espace fidèles -----
+  function barreFideles(actif) {
+    const onglets = [['accueil', '#/', 'Accueil', ICONES.accueil], ['predications', '#/predications', 'Prédications', ICONES.ecouter],
+      ['meditation', '#/meditations', 'Méditation', ICONES.livre], ['programmes', '#/programmes', 'Programmes', ICONES.agenda],
+      ['priere', '#/priere', 'Prière', ICONES.priere]];
+    return `<nav class="onglets" aria-label="Navigation de l’espace fidèles">${onglets.map(([cle, lien, nom, icone]) =>
+      `<a href="${lien}" class="${cle === actif ? 'actif' : ''}" ${cle === actif ? 'aria-current="page"' : ''}>${icone}<span>${nom}</span></a>`).join('')}</nav>`;
   }
 
   // ----- Barre de navigation en bas -----
   function estApotre() { return Boolean(etat.profil && ['apotre', 'admin'].includes(etat.profil.role)); }
   function barreOnglets(actif) {
     const onglets = estApotre()
-      ? [['rapports', '#/', 'Rapports', ICONES.rapports], ['stats', '#/stats', 'Statistiques', ICONES.stats],
+      ? [['rapports', '#/', 'Accueil', ICONES.accueil], ['stats', '#/stats', 'Statistiques', ICONES.stats],
          ['eglises', '#/eglises', 'Églises', ICONES.eglise], ['agenda', '#/agenda', 'Programmes', ICONES.agenda], ['plus', '#/plus', 'Plus', ICONES.menu]]
-      : [['rapports', '#/', 'Rapports', ICONES.rapports], ['membres', '#/membres', 'Membres', ICONES.membres],
+      : [['rapports', '#/', 'Accueil', ICONES.accueil], ['membres', '#/membres', 'Membres', ICONES.membres],
          ['finances', '#/finances', 'Finances', ICONES.finances], ['agenda', '#/agenda', 'Programmes', ICONES.agenda], ['plus', '#/plus', 'Plus', ICONES.menu]];
     return `<nav class="onglets" aria-label="Navigation principale">${onglets.map(([cle, lien, nom, icone]) =>
       `<a href="${lien}" class="${cle === actif ? 'actif' : ''}" ${cle === actif ? 'aria-current="page"' : ''}>${icone}<span>${nom}</span></a>`).join('')}</nav>`;
@@ -228,25 +354,37 @@
 
   // ================= Navigation =================
 
-  function route(motif, ecran, options = {}) { routes.push({ motif, ecran, public: Boolean(options.public) }); }
-  function aller(chemin) { if (location.hash === '#' + chemin) router(); else location.hash = chemin; }
+  // public : visible par tous ; invite : page montrée seulement à qui n'est pas connecté
+  function route(motif, ecran, options = {}) { routes.push({ motif, ecran, public: Boolean(options.public), invite: Boolean(options.invite) }); }
+  function aller(chemin) { if (location.hash === '#' + chemin || (chemin === '/' && !location.hash)) router(); else location.hash = chemin; }
 
   async function router() {
     const chemin = location.hash.replace(/^#/, '') || '/';
     for (const r of routes.filter((x) => x.public)) {
       const m = chemin.match(r.motif);
-      if (m) return r.ecran(m.groups || {});
+      if (m) {
+        try { return await r.ecran(m.groups || {}); }
+        catch (err) { console.error(err); toast(messageErreur(err)); return; }
+      }
     }
     const { data } = await sb.auth.getSession();
     const session = data.session;
-    if (!session) { etat.profil = null; return ecranConnexion(); }
+    if (!session) {
+      etat.profil = null;
+      for (const r of routes.filter((x) => x.invite)) {
+        const m = chemin.match(r.motif);
+        if (m) return r.ecran(m.groups || {});
+      }
+      return ecranConnexion();
+    }
     if (!etat.profil || etat.profil.id !== session.user.id) {
       const ok = await chargerProfil(session.user.id);
       if (!ok) return;
     }
     if (etat.profil.doit_changer_mdp) return ecranPremiereConnexion();
     await chargerEglisesEtPasteurs();
-    for (const r of routes.filter((x) => !x.public)) {
+    envoyerFileAttente();
+    for (const r of routes.filter((x) => !x.public && !x.invite)) {
       const m = chemin.match(r.motif);
       if (m) {
         try { return await r.ecran(m.groups || {}); }
@@ -288,7 +426,7 @@
           <div class="logo"><img src="icon-192.png" alt="Logo de la Cité de la Bonne Nouvelle"></div>
           <h1>Cité de la Bonne Nouvelle</h1>
           <p>Rapports et vie des églises</p>
-          <a class="lien-public" href="#/programmes">${ICONES.agenda} Voir les programmes de la CBN</a>
+          <a class="lien-public" href="#/">${ICONES.accueil} Espace fidèles</a>
         </div>
         <form class="feuille" id="form-connexion" novalidate>
           <h2>Espace pasteurs</h2>
@@ -324,7 +462,8 @@
         erreur.textContent = messageErreur(error); erreur.hidden = false;
         btn.disabled = false; btn.textContent = 'Se connecter'; return;
       }
-      aller('/');
+      const ici = location.hash.replace(/^#/, '');
+      aller(ici && ici !== '/connexion' ? ici : '/');
     };
   }
 
@@ -407,6 +546,16 @@
           <div class="paire"><span>${apotre ? 'Rôle' : 'Église'}</span><strong>${esc(apotre ? 'Apôtre' : (p.eglises ? p.eglises.nom : ''))}</strong></div>
         </section>
         <p class="discret" style="margin:0 4px">Pour changer votre nom ou votre numéro, contactez l’administrateur de la CBN.</p>
+        <section class="carte">
+          <h2>Apparence</h2>
+          <p class="discret">« Automatique » suit le réglage du téléphone (sombre la nuit si le téléphone le fait).</p>
+          ${choixApparence()}
+        </section>
+        <section class="carte">
+          <h2>Notifications sur ce téléphone</h2>
+          <p class="discret" id="etat-push">Recevez une alerte même quand l’application est fermée.</p>
+          <button class="btn secondaire" type="button" id="activer-push">${ICONES.cloche} Activer les notifications</button>
+        </section>
         <form class="carte" id="form-mdp" novalidate>
           <h2>Changer le mot de passe</h2>
           <div class="champ"><label for="actuel">Mot de passe actuel</label>
@@ -423,6 +572,7 @@
 
     document.getElementById('sortir').onclick = deconnexion;
     document.getElementById('sortir-bas').onclick = deconnexion;
+    preparerBoutonPush(document.getElementById('activer-push'), document.getElementById('etat-push'));
     document.getElementById('fichier-photo').onchange = (e) =>
       changerPhoto(e.target.files[0], document.getElementById('apercu')).then(() => { if (etat.profil.photo_url) document.getElementById('retirer-photo').disabled = false; });
     document.getElementById('retirer-photo').onclick = async () => {
@@ -457,46 +607,197 @@
 
   // ================= Menu « Plus » =================
 
-  function ecranPlus() {
+  async function ecranPlus() {
     const p = etat.profil;
     const apotre = estApotre();
-    const ligne = (lien, icone, titre, texte) => `<a class="ligne" href="${lien}"><span class="icone-ligne">${icone}</span><span class="corps"><strong>${titre}</strong><span>${texte}</span></span>${ICONES.suivant}</a>`;
-    const elements = apotre ? [
+    const ligne = (lien, icone, titre, texte, compte) => `<a class="ligne" href="${lien}"><span class="icone-ligne">${icone}</span><span class="corps"><strong>${titre}</strong><span>${texte}</span></span>${compte ? `<span class="pastille envoye">${compte}</span>` : ''}${ICONES.suivant}</a>`;
+    const { count: demandes } = await sb.from('demandes').select('id', { count: 'exact', head: true }).eq('statut', 'nouvelle');
+    const gestion = apotre ? [
       ligne('#/rapports', ICONES.rapports, 'Tous les rapports', 'Dimanche, mercredi, vendredi, programmes, conventions'),
       ligne('#/finances-cbn', ICONES.finances, 'Rapport de gestion', 'Entrées, dépenses et solde de chaque église'),
-      ligne('#/documents', ICONES.document, 'Documents et archives', 'Procès-verbaux, correspondances, archives'),
-      ligne('#/programmes', ICONES.globe, 'Page publique des fidèles', 'Ce que voient les fidèles, sans compte')
+      ligne('#/anniversaires', ICONES.gateau, 'Anniversaires', 'Membres de toutes les églises, cette semaine et ce mois'),
+      ligne('#/documents', ICONES.document, 'Documents et archives', 'Procès-verbaux, correspondances, archives')
     ] : [
       ligne('#/suivi', ICONES.suivi, 'Suivi des âmes', 'Nouveaux convertis et visiteurs à appeler ou visiter'),
+      ligne('#/anniversaires', ICONES.gateau, 'Anniversaires', 'Souhaitez-les par WhatsApp en un clic'),
       ligne('#/stats', ICONES.stats, 'Statistiques', 'Évolution de la fréquentation et des entrées'),
       ligne('#/rapports', ICONES.rapports, 'Tous mes rapports', 'Tous les cultes envoyés'),
       ligne('#/departements', ICONES.groupe, 'Départements', 'Responsables et membres de chaque département'),
-      ligne('#/documents', ICONES.document, 'Documents et archives', 'Procès-verbaux, correspondances, archives'),
-      ligne('#/programmes', ICONES.globe, 'Page publique des fidèles', 'Ce que voient les fidèles, sans compte')
+      ligne('#/documents', ICONES.document, 'Documents et archives', 'Procès-verbaux, correspondances, archives')
+    ];
+    const fideles = [
+      ligne('#/demandes', ICONES.priere, apotre ? 'Prières et questions' : 'Demandes de prière', apotre ? 'Envoyées par les fidèles' : 'Envoyées par les fidèles de votre église', demandes),
+      ligne('#/gerer/predications', ICONES.ecouter, 'Prédications', 'Ajouter des messages audio ou vidéo'),
+      apotre ? ligne('#/gerer/meditations', ICONES.livre, 'Méditations du jour', 'Écrire et programmer les méditations') : '',
+      ligne('#/fideles', ICONES.globe, 'Voir l’espace fidèles', 'Ce que voient les fidèles, sans compte')
     ];
     afficher(`
       <div class="hero">
         <div class="hero-ligne">
           <div class="hero-identite">${lienProfil(p)}<a href="#/profil" class="lien-profil"><div class="hero-nom">${esc(p.nom)}</div><div class="hero-petit souligne">Mon profil</div></a></div>
-          <button class="bouton-rond" id="sortir" aria-label="Se déconnecter">${ICONES.sortir}</button>
+          ${cloche()}
         </div>
         <h1>Plus</h1>
       </div>
-      <div class="contenu"><div class="liste">${elements.join('')}
-        ${ligne('#/profil', ICONES.profil, 'Mon profil', 'Photo et mot de passe')}</div>
+      <div class="contenu">
+        <h2 class="titre-section" style="margin-top:0">Gestion</h2>
+        <div class="liste">${gestion.join('')}</div>
+        <h2 class="titre-section">Espace fidèles</h2>
+        <div class="liste">${fideles.join('')}</div>
+        <h2 class="titre-section">Mon compte</h2>
+        <div class="liste">
+          ${ligne('#/notifications', ICONES.cloche, 'Notifications', 'Rapports, demandes, inscriptions', etat.nonLues || '')}
+          ${ligne('#/profil', ICONES.profil, 'Mon profil', 'Photo, mot de passe, apparence')}
+        </div>
+        <button class="btn secondaire" id="sortir">${ICONES.sortir} Se déconnecter</button>
       </div>`, 'plus');
     document.getElementById('sortir').onclick = deconnexion;
   }
 
+  // ================= Notifications =================
+
+  async function ecranNotifications() {
+    const { data, error } = await sb.from('notifications').select('*').order('created_at', { ascending: false }).limit(60);
+    const liste = data || [];
+    const nonLues = liste.filter((n) => !n.lu).length;
+    const quand = (ts) => {
+      const jour = new Intl.DateTimeFormat('en-CA', { timeZone: CFG.FUSEAU }).format(new Date(ts));
+      const ecart = ecartJours(jour, aujourdhuiISO());
+      return (ecart === 0 ? 'Aujourd’hui' : ecart === 1 ? 'Hier' : dateCourte(jour)) + ' à ' + heure(ts);
+    };
+    afficher(`
+      ${hero('Notifications', { retour: '#/plus', droite: '<span></span>', sousTitre: nonLues ? `${nonLues} non lue${nonLues > 1 ? 's' : ''}` : 'Tout est lu' })}
+      <div class="contenu">
+        <section class="carte" id="carte-push" hidden>
+          <div class="entete-carte"><h2 class="petit-titre">Sur ce téléphone</h2></div>
+          <p class="discret" id="etat-push">Recevez ces alertes même quand l’application est fermée.</p>
+          <button class="btn" type="button" id="activer-push">${ICONES.cloche} Activer les notifications</button>
+        </section>
+        ${error ? `<p class="erreur">${esc(messageErreur(error))}</p>` : ''}
+        ${nonLues ? '<button class="btn secondaire" id="tout-lu">Tout marquer comme lu</button>' : ''}
+        <div class="liste">
+          ${liste.length ? liste.map((n) => `
+            <a class="ligne notif ${n.lu ? '' : 'non-lue'}" href="${esc(n.lien || '#/notifications')}" data-notif="${n.id}">
+              <span class="point-notif" aria-hidden="true"></span>
+              <span class="corps"><strong>${esc(n.titre)}</strong>${n.texte ? `<span>${esc(n.texte)}</span>` : ''}<span class="quand">${esc(quand(n.created_at))}${n.lu ? '' : ' · non lue'}</span></span>
+            </a>`).join('') : '<p class="vide">Aucune notification pour le moment. Vous serez prévenu ici des nouveaux rapports, des demandes de prière et des inscriptions.</p>'}
+        </div>
+      </div>`, 'plus');
+    document.querySelectorAll('[data-notif]').forEach((a) => {
+      a.onclick = () => { sb.from('notifications').update({ lu: true }).eq('id', a.dataset.notif).then(majCloche); };
+    });
+    const toutLu = document.getElementById('tout-lu');
+    if (toutLu) toutLu.onclick = async () => {
+      const r = await sb.from('notifications').update({ lu: true }).eq('lu', false);
+      if (r.error) return toast(messageErreur(r.error));
+      ecranNotifications();
+    };
+    if (pushPossible() && Notification.permission !== 'granted') {
+      document.getElementById('carte-push').hidden = false;
+      preparerBoutonPush(document.getElementById('activer-push'), document.getElementById('etat-push'));
+    }
+  }
+
+  // ----- Notifications sur le téléphone (Web Push) -----
+  function pushPossible() { return 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window && Boolean(CFG.VAPID_PUBLIC); }
+  function cleVersOctets(b64) {
+    const pad = '='.repeat((4 - (b64.length % 4)) % 4);
+    const brut = atob((b64 + pad).replace(/-/g, '+').replace(/_/g, '/'));
+    return Uint8Array.from(brut, (c) => c.charCodeAt(0));
+  }
+  async function activerPush() {
+    const permission = await Notification.requestPermission();
+    if (permission !== 'granted') throw new Error('refus');
+    const reg = await navigator.serviceWorker.ready;
+    let abo = await reg.pushManager.getSubscription();
+    if (!abo) abo = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: cleVersOctets(CFG.VAPID_PUBLIC) });
+    const j = abo.toJSON();
+    const r = await sb.from('abonnements_push').upsert({ profil_id: etat.profil.id, endpoint: j.endpoint, p256dh: j.keys.p256dh, auth: j.keys.auth }, { onConflict: 'endpoint' });
+    if (r.error) throw r.error;
+  }
+  function preparerBoutonPush(btn, texte) {
+    if (!btn) return;
+    const ios = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+    const installee = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+    if (!pushPossible()) {
+      btn.hidden = true;
+      texte.textContent = ios && !installee
+        ? 'Sur iPhone : ajoutez d’abord l’application à l’écran d’accueil (bouton Partager › « Sur l’écran d’accueil »), puis revenez ici.'
+        : 'Ce téléphone ou ce navigateur ne permet pas les notifications. Elles restent visibles dans la cloche.';
+      return;
+    }
+    if (Notification.permission === 'granted') {
+      btn.innerHTML = ICONES.coche + ' Notifications activées';
+      btn.disabled = true; btn.classList.add('pas-attente');
+      activerPush().catch(() => {});
+      return;
+    }
+    if (Notification.permission === 'denied') {
+      btn.hidden = true;
+      texte.textContent = 'Les notifications sont bloquées. Autorisez-les dans les réglages du navigateur pour ce site.';
+      return;
+    }
+    btn.onclick = async () => {
+      btn.disabled = true;
+      try {
+        await activerPush();
+        btn.innerHTML = ICONES.coche + ' Notifications activées';
+        btn.classList.add('pas-attente');
+        toast('Notifications activées sur ce téléphone');
+      } catch (err) {
+        btn.disabled = false;
+        toast(err && err.message === 'refus' ? 'Notifications refusées' : messageErreur(err));
+      }
+    };
+  }
+
   route(/^\/profil$/, ecranProfil);
   route(/^\/plus$/, ecranPlus);
+  route(/^\/notifications$/, ecranNotifications);
+  route(/^\/connexion$/, async () => {
+    const { data } = await sb.auth.getSession();
+    if (data.session) return aller('/');
+    etat.profil = null;
+    ecranConnexion();
+  }, { public: true });
 
   // ================= Démarrage =================
 
   function demarrer() {
+    appliquerTheme(themeChoisi());
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+      majCouleurNavigateur();
+      document.querySelectorAll('[data-theme-bascule]').forEach((b) => { b.innerHTML = estSombre() ? ICONES.soleil : ICONES.lune; });
+    });
+    // Boutons d'apparence présents sur plusieurs écrans
+    document.addEventListener('click', (e) => {
+      const bascule = e.target.closest('[data-theme-bascule]');
+      if (bascule) {
+        basculerTheme();
+        bascule.innerHTML = estSombre() ? ICONES.soleil : ICONES.lune;
+        bascule.setAttribute('aria-label', estSombre() ? 'Passer en mode clair' : 'Passer en mode sombre');
+      }
+      const choix = e.target.closest('[data-apparence]');
+      if (choix) {
+        appliquerTheme(choix.dataset.apparence);
+        choix.parentElement.querySelectorAll('[data-apparence]').forEach((b) => {
+          const actif = b === choix; b.classList.toggle('actif', actif); b.setAttribute('aria-checked', String(actif));
+        });
+      }
+    });
     window.addEventListener('hashchange', router);
+    window.addEventListener('online', majHorsLigne);
+    window.addEventListener('offline', majHorsLigne);
+    majHorsLigne();
     sb.auth.onAuthStateChange((evenement) => { if (evenement === 'SIGNED_OUT') { etat.profil = null; } });
-    if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+      navigator.serviceWorker.addEventListener('message', (e) => {
+        if (e.data && e.data.type === 'ouvrir' && e.data.lien) location.hash = e.data.lien.replace(/^#/, '');
+        if (e.data && e.data.type === 'notification') majCloche();
+      });
+    }
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) majCloche(); });
     if (CFG.SUPABASE_URL.includes('VOTRE-PROJET')) {
       afficher('<div class="chargement"><img src="icon-192.png" alt="" width="96" height="96"><p>Application pas encore reliée à la base de données (fichier config.js).</p></div>');
     } else {
@@ -508,7 +809,9 @@
     sb, etat, CFG, ICONES, esc, nombre, fcfa, initiales, toast, messageErreur,
     telephoneLisible, telephoneInternational, aujourdhuiISO, versDate, versISO, ajouterJours, ecartJours,
     dimancheDeReference, dateLongue, dateCourte, dateJour, heure, moisCourant, ajouterMois, moisLibelle, moisCourt, finDeMois,
-    avatarHTML, lienProfil, logoRond, hero, boutonConfirme, afficher, estApotre, chargerEglisesEtPasteurs, nomEglise,
-    egliseDe, peutEcrire, peutPublier, prefixe, entetePDF, route, aller, router, deconnexion, demarrer
+    avatarHTML, lienProfil, logoRond, hero, cloche, majCloche, boutonConfirme, afficher, estApotre, chargerEglisesEtPasteurs, nomEglise,
+    egliseDe, peutEcrire, peutPublier, prefixe, entetePDF, route, aller, router, deconnexion, demarrer,
+    boutonTheme, estSombre, fileAttente, mettreEnAttente, envoyerFileAttente, estErreurReseau,
+    anniversairesProches, lienWhatsApp
   };
 })();
