@@ -1,7 +1,7 @@
 // CBN — fonctionne hors connexion (l'application s'ouvre même sans réseau)
 // et reçoit les notifications sur le téléphone.
 // Les données (rapports, membres…) viennent toujours d'Internet, jamais du cache.
-const VERSION = 'cbn-v5';
+const VERSION = 'cbn-v6';
 const FICHIERS = [
   './', 'index.html', 'style.css', 'config.js', 'core.js', 'rapports.js', 'eglise.js', 'fideles.js', 'plan-versets.js', 'parole.js', 'agenda.js',
   'manifest.webmanifest', 'icon-192.png', 'icon-512.png'
@@ -10,7 +10,7 @@ const FICHIERS = [
 const EXTERNES = ['cdn.jsdelivr.net', 'cdnjs.cloudflare.com', 'fonts.googleapis.com', 'fonts.gstatic.com', 'api.getbible.net'];
 
 self.addEventListener('install', (e) => {
-  e.waitUntil(caches.open(VERSION).then((c) => c.addAll(FICHIERS)).then(() => self.skipWaiting()));
+  e.waitUntil(caches.open(VERSION).then((c) => c.addAll(FICHIERS.map((f) => new Request(f, { cache: 'reload' })))).then(() => self.skipWaiting()));
 });
 
 self.addEventListener('activate', (e) => {
@@ -27,7 +27,7 @@ self.addEventListener('fetch', (e) => {
   if (url.origin === self.location.origin) {
     // Réseau d'abord (toujours la dernière version), cache si hors connexion
     e.respondWith(
-      fetch(e.request)
+      fetch(e.request, { cache: 'no-cache' })
         .then((rep) => {
           if (rep.ok) { const copie = rep.clone(); caches.open(VERSION).then((c) => c.put(e.request, copie)); }
           return rep;
