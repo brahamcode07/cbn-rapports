@@ -21,6 +21,7 @@
 
   const svg = (d, taille = 20, ep = 2) => `<svg width="${taille}" height="${taille}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${ep}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
   const ICONES = {
+    lieu: svg('<path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>'),
     retour: svg('<path d="M15 18l-6-6 6-6"/>'),
     suivant: svg('<path d="M9 18l6-6-6-6"/>'),
     sortir: svg('<path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 16l-4-4 4-4M6 12h10"/>', 20, 1.8),
@@ -57,6 +58,9 @@
     gateau: svg('<path d="M4 21V12a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v9M2 21h20M4 15c2 1.5 4 1.5 6 0s4-1.5 6 0 4 1.5 4 0M12 10V7"/><path d="M12 3c.8 1 1 1.8 0 3-1-1.2-.8-2 0-3z"/>', 20, 1.8),
     nuage: svg('<path d="M17.5 19a4.5 4.5 0 1 0-1.4-8.8A6 6 0 1 0 6 16.9"/><path d="M12 12v8M9 17l3 3 3-3"/>', 20, 1.8),
     hors: svg('<path d="M2 2l20 20M8.5 16.5a5 5 0 0 1 7 0M5 13a10 10 0 0 1 5.2-2.8M19 13a10 10 0 0 0-2.2-1.6M2 8.8a15 15 0 0 1 4.2-2.7M22 8.8A15 15 0 0 0 10.7 5M12 20h.01"/>', 18, 1.8),
+    oeil: svg('<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>', 20, 1.8),
+    oeilBarre: svg('<path d="M3 3l18 18M10.6 5.1A10.8 10.8 0 0 1 12 5c6.5 0 10 7 10 7a17.7 17.7 0 0 1-3.2 4.2M6.6 6.6C3.9 8.4 2 12 2 12s3.5 7 10 7c1.9 0 3.6-.6 5-1.5M9.9 9.9a3 3 0 0 0 4.2 4.2"/>', 20, 1.8),
+    image: svg('<rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/>', 22, 1.8),
     whatsapp: '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.2-.4.7-1.4.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6a2.7 2.7 0 0 0 1.8-1.3 2.2 2.2 0 0 0 .2-1.3c-.1-.1-.2-.2-.5-.3z"/></svg>'
   };
 
@@ -259,13 +263,38 @@
     app.innerHTML = html + (avecOnglets ? (fideles ? barreFideles(onglet) : barreOnglets(onglet)) : '');
     document.body.classList.toggle('avec-onglets', avecOnglets);
     window.scrollTo(0, 0);
+    ajouterYeux(app);
     if (etat.profil && !fideles) majCloche();
+  }
+
+  // Bouton « œil » pour afficher ou cacher le mot de passe
+  function ajouterYeux(racine) {
+    racine.querySelectorAll('input[type="password"]').forEach((champ) => {
+      if (champ.parentElement.classList.contains('champ-mdp')) return;
+      const enveloppe = document.createElement('span');
+      enveloppe.className = 'champ-mdp';
+      champ.parentNode.insertBefore(enveloppe, champ);
+      enveloppe.appendChild(champ);
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'oeil';
+      b.setAttribute('aria-label', 'Afficher le mot de passe');
+      b.innerHTML = ICONES.oeil;
+      b.onclick = () => {
+        const visible = champ.type === 'text';
+        champ.type = visible ? 'password' : 'text';
+        b.innerHTML = visible ? ICONES.oeil : ICONES.oeilBarre;
+        b.setAttribute('aria-label', visible ? 'Afficher le mot de passe' : 'Cacher le mot de passe');
+        champ.focus();
+      };
+      enveloppe.appendChild(b);
+    });
   }
 
   // ----- Barre de navigation de l'espace fidèles -----
   function barreFideles(actif) {
     const onglets = [['accueil', '#/', 'Accueil', ICONES.accueil], ['predications', '#/predications', 'Prédications', ICONES.ecouter],
-      ['meditation', '#/meditations', 'Méditation', ICONES.livre], ['programmes', '#/programmes', 'Programmes', ICONES.agenda],
+      ['parole', '#/parole', 'Parole', ICONES.livre], ['programmes', '#/programmes', 'Programmes', ICONES.agenda],
       ['priere', '#/priere', 'Prière', ICONES.priere]];
     return `<nav class="onglets" aria-label="Navigation de l’espace fidèles">${onglets.map(([cle, lien, nom, icone]) =>
       `<a href="${lien}" class="${cle === actif ? 'actif' : ''}" ${cle === actif ? 'aria-current="page"' : ''}>${icone}<span>${nom}</span></a>`).join('')}</nav>`;

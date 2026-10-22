@@ -1,13 +1,13 @@
 // CBN — fonctionne hors connexion (l'application s'ouvre même sans réseau)
 // et reçoit les notifications sur le téléphone.
 // Les données (rapports, membres…) viennent toujours d'Internet, jamais du cache.
-const VERSION = 'cbn-v4';
+const VERSION = 'cbn-v5';
 const FICHIERS = [
-  './', 'index.html', 'style.css', 'config.js', 'core.js', 'rapports.js', 'eglise.js', 'fideles.js', 'agenda.js',
+  './', 'index.html', 'style.css', 'config.js', 'core.js', 'rapports.js', 'eglise.js', 'fideles.js', 'plan-versets.js', 'parole.js', 'agenda.js',
   'manifest.webmanifest', 'icon-192.png', 'icon-512.png'
 ];
 // Bibliothèques et polices venant d'autres sites : gardées pour l'usage hors connexion
-const EXTERNES = ['cdn.jsdelivr.net', 'cdnjs.cloudflare.com', 'fonts.googleapis.com', 'fonts.gstatic.com'];
+const EXTERNES = ['cdn.jsdelivr.net', 'cdnjs.cloudflare.com', 'fonts.googleapis.com', 'fonts.gstatic.com', 'api.getbible.net'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(VERSION).then((c) => c.addAll(FICHIERS)).then(() => self.skipWaiting()));

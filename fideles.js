@@ -141,45 +141,50 @@
 
   async function ecranAccueil() {
     const auj = C.aujourdhuiISO();
-    const [eglises, med, preds, evs] = await Promise.all([
+    const [, med, preds, evs] = await Promise.all([
       eglisesPubliques(),
-      sb.from('meditations').select('*').lte('date_med', auj).order('date_med', { ascending: false }).limit(1),
+      sb.from('meditations').select('id, date_med, titre').eq('date_med', auj).maybeSingle(),
       sb.from('predications').select('*').order('date_pred', { ascending: false }).order('created_at', { ascending: false }).limit(3),
-      sb.from('evenements').select('*').or(`date_fin.gte.${auj},and(date_fin.is.null,date_debut.gte.${auj})`).order('date_debut').limit(3)
+      sb.from('evenements').select('*').or(`date_fin.gte.${auj},and(date_fin.is.null,date_debut.gte.${auj})`).order('date_debut').limit(4)
     ]);
-    const m = (med.data || [])[0];
-    const erreur = med.error || preds.error || evs.error;
+    const erreur = preds.error || evs.error;
     afficher(`
-      ${heroFideles(`${salutation()}, bienvenue`, { sousTitre: 'Prédications, méditation du jour et programmes de nos églises de ' + esc(eglises.map((e) => e.nom.replace('CBN ', '')).join(', ')) + '.', grand: true })}
+      <div class="hero public grand accueil-hero">
+        <div class="hero-ligne">
+          <div class="marque">${C.logoRond()}<span>Cité de la Bonne Nouvelle</span></div>
+          <div class="hero-identite">${C.boutonTheme()}<a class="pilule-or" href="${etat.profil ? '#/' : '#/connexion'}" aria-label="${etat.profil ? 'Mon espace' : 'Espace pasteurs : connexion'}">${ICONES.profil}<span>${etat.profil ? 'Mon espace' : 'Pasteurs'}</span></a></div>
+        </div>
+        <div>
+          <p class="hero-petit">${salutation()} et bienvenue</p>
+          <h1>Bienvenue à la Cité de la Bonne Nouvelle</h1>
+        </div>
+        ${C.carrouselRoyaume()}
+      </div>
       <div class="contenu remonte-un-peu">
         ${erreur ? `<p class="erreur">${esc(messageErreur(erreur))}</p>` : ''}
-        ${m ? `
-          <a class="carte flottante meditation-carte" href="#/meditation/${m.date_med}">
-            <span class="surtitre">${m.date_med === auj ? 'Méditation du jour' : 'Dernière méditation'} · ${esc(C.dateCourte(m.date_med))}</span>
-            <div class="grand-titre">${esc(m.titre)}</div>
-            ${m.verset ? `<blockquote class="verset">« ${esc(m.verset)} »${m.reference ? `<cite>${esc(m.reference)}</cite>` : ''}</blockquote>` : (m.reference ? `<p class="discret">${esc(m.reference)}</p>` : '')}
-            <span class="lien-fleche">Lire la méditation ${ICONES.suivant}</span>
-          </a>` : `
-          <section class="carte flottante">
-            <span class="surtitre">Méditation du jour</span>
-            <p class="discret">La méditation du jour apparaîtra ici dès que l’apôtre l’aura publiée.</p>
-          </section>`}
+        ${C.carteVersetDuJour(auj, { meditation: med.data })}
+        ${C.carteLecture()}
+        <div class="entete-section"><h2 class="titre-section">Prochains programmes</h2><a href="#/programmes">Tout voir</a></div>
+        ${(evs.data || []).length ? `<div class="defile-cartes">${evs.data.map((ev) => `
+          <a class="carte-programme" href="#/programmes">
+            ${ev.affiche_url ? `<img src="${esc(ev.affiche_url)}" alt="" loading="lazy">` : `<span class="affiche-vide">${ICONES.agenda}</span>`}
+            <span class="carte-programme-corps">
+              <small>${esc(C.dateCourte(ev.date_debut))}${ev.heure ? ' · ' + esc(ev.heure) : ''}</small>
+              <strong>${esc(ev.titre)}</strong>
+              <span>${esc(C.nomEglise(ev.eglise_id))}</span>
+            </span>
+          </a>`).join('')}</div>` : '<p class="vide">Aucun programme à venir pour le moment.</p>'}
         <div class="entete-section"><h2 class="titre-section">Dernières prédications</h2><a href="#/predications">Tout voir</a></div>
         <div class="liste">${(preds.data || []).length ? preds.data.map(lignePredication).join('') : '<p class="vide">Les prédications à écouter apparaîtront ici.</p>'}</div>
-        <div class="entete-section"><h2 class="titre-section">Prochains programmes</h2><a href="#/programmes">Tout voir</a></div>
-        <div class="liste">${(evs.data || []).length ? evs.data.map((ev) => `
-          <a class="ligne" href="#/programmes">
-            <span class="date-bloc petit" aria-hidden="true"><strong>${C.versDate(ev.date_debut).getUTCDate()}</strong><span>${esc(C.moisCourt(ev.date_debut.slice(0, 7)))}</span></span>
-            <span class="corps"><strong>${esc(ev.titre)}</strong><span>${esc(C.nomEglise(ev.eglise_id))}${ev.heure ? ' · ' + esc(ev.heure) : ''}</span></span>
-            ${ev.inscriptions ? '<span class="pastille vu">Inscriptions</span>' : ''}
-          </a>`).join('') : '<p class="vide">Aucun programme à venir pour le moment.</p>'}</div>
         <section class="carte appel-priere">
           <div class="icone-ligne grande">${ICONES.priere}</div>
           <div><h2>Besoin de prière ?</h2><p class="discret">Confiez-nous votre sujet de prière ou posez une question à l’apôtre. Vous pouvez rester anonyme.</p></div>
           <a class="btn" href="#/priere">Envoyer une demande</a>
         </section>
-        <p class="discret pied">Cité de la Bonne Nouvelle · ${esc(eglises.map((e) => e.nom).join(' · '))}</p>
+        <p class="discret pied">Cité de la Bonne Nouvelle</p>
       </div>`, 'accueil', 'fideles');
+    C.remplirVersets();
+    C.animerRoyaume();
   }
 
   // ================= Prédications =================
@@ -276,7 +281,7 @@
     const { data, error } = await sb.from('meditations').select('id, date_med, titre, reference').lte('date_med', auj).order('date_med', { ascending: false }).limit(60);
     const [premiere, ...autres] = data || [];
     afficher(`
-      ${heroFideles('Méditation du jour', { sousTitre: 'Une parole pour chaque jour, à lire et à partager.' })}
+      ${heroFideles('Méditations de l’apôtre', { retour: '#/parole', sousTitre: 'Les méditations écrites par l’apôtre Elvis Yumto.' })}
       <div class="contenu">
         ${error ? `<p class="erreur">${esc(messageErreur(error))}</p>` : ''}
         ${premiere ? `<a class="carte flottante meditation-carte" href="#/meditation/${premiere.date_med}">
@@ -288,16 +293,13 @@
           <div class="liste">${autres.map((m) => `<a class="ligne" href="#/meditation/${m.date_med}">
             <span class="date-bloc petit clair" aria-hidden="true"><strong>${C.versDate(m.date_med).getUTCDate()}</strong><span>${esc(C.moisCourt(m.date_med.slice(0, 7)))}</span></span>
             <span class="corps"><strong>${esc(m.titre)}</strong><span>${esc(m.reference || C.dateJour(m.date_med))}</span></span>${ICONES.suivant}</a>`).join('')}</div>` : ''}
-      </div>`, 'meditation', 'fideles');
+      </div>`, 'parole', 'fideles');
   }
 
   async function ecranMeditation({ date }) {
     const auj = C.aujourdhuiISO();
     const { data: m, error } = await sb.from('meditations').select('*').eq('date_med', date).maybeSingle();
-    if (error || !m || (date > auj && !C.estApotre())) {
-      afficher(`${heroFideles('Méditation', { retour: '#/meditations' })}<div class="contenu"><p class="vide">${esc(error ? messageErreur(error) : 'Pas de méditation publiée pour ce jour.')}</p></div>`, 'meditation', 'fideles');
-      return;
-    }
+    if (error || !m || (date > auj && !C.estApotre())) return aller('/verset/' + (date > auj ? auj : date));
     const [{ data: avant }, { data: apres }] = await Promise.all([
       sb.from('meditations').select('date_med').lt('date_med', date).order('date_med', { ascending: false }).limit(1),
       sb.from('meditations').select('date_med').gt('date_med', date).lte('date_med', auj).order('date_med').limit(1)
@@ -319,7 +321,7 @@
           ${(avant || [])[0] ? `<a class="btn secondaire" href="#/meditation/${avant[0].date_med}">${ICONES.retour} Veille</a>` : '<span></span>'}
           ${(apres || [])[0] ? `<a class="btn secondaire" href="#/meditation/${apres[0].date_med}">Suivante ${ICONES.suivant}</a>` : '<span></span>'}
         </div>
-      </div>`, 'meditation', 'fideles');
+      </div>`, 'parole', 'fideles');
   }
 
   // ================= Demande de prière / question =================

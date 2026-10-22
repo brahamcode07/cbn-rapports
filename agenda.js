@@ -30,7 +30,7 @@
 
   function carteEvenement(ev, gerer) {
     const jour = C.versDate(ev.date_debut);
-    return `<article class="carte evenement">
+    return `${ev.affiche_url ? `<a class="affiche-programme" href="${esc(ev.affiche_url)}" target="_blank" rel="noopener" aria-label="Voir l’affiche de ${esc(ev.titre)} en grand"><img src="${esc(ev.affiche_url)}" alt="Affiche : ${esc(ev.titre)}" loading="lazy"></a>` : ''}<article class="carte evenement ${ev.affiche_url ? 'avec-affiche' : ''}">
       <div class="date-bloc" aria-hidden="true"><strong>${jour.getUTCDate()}</strong><span>${esc(C.moisCourt(ev.date_debut.slice(0, 7)))}</span></div>
       <div class="evenement-corps">
         <div class="evenement-tags"><span class="pastille type-${ev.type}">${TYPES[ev.type]}</span><span class="discret">${esc(C.nomEglise(ev.eglise_id))}</span></div>
@@ -70,7 +70,7 @@
       const f = ecranPublic.filtre || '';
       const y = window.scrollY;
       afficher(`
-        ${C.heroFideles('Programmes et annonces', { sousTitre: 'Cultes, programmes, retraites et conventions de nos églises de Mbouda, Galim, Babeté et Bafoussam.' })}
+        ${C.heroFideles('Programmes et annonces', { sousTitre: 'Cultes, programmes, retraites et conventions de la Cité de la Bonne Nouvelle.' })}
         <div class="contenu">
           ${puces(f)}
           ${erreur ? `<p class="erreur">${esc(messageErreur(erreur))}</p>` : ''}
@@ -196,6 +196,24 @@
     document.querySelectorAll('[data-eglise]').forEach((b) => { b.onclick = () => { ecranAgenda.filtre = b.dataset.eglise; ecranAgenda(); }; });
   }
 
+  // Réduit une image (affiche) avant l'envoi : 1400 px de large au plus, en JPEG
+  function reduireAffiche(fichier) {
+    return new Promise((ok, ko) => {
+      const img = new Image();
+      const url = URL.createObjectURL(fichier);
+      img.onload = () => {
+        const echelle = Math.min(1, 1400 / Math.max(img.width, img.height));
+        const cv = document.createElement('canvas');
+        cv.width = Math.round(img.width * echelle); cv.height = Math.round(img.height * echelle);
+        cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
+        URL.revokeObjectURL(url);
+        cv.toBlob((bl) => (bl ? ok(bl) : ko(new Error('Image illisible'))), 'image/jpeg', 0.84);
+      };
+      img.onerror = () => ko(new Error('Image illisible'));
+      img.src = url;
+    });
+  }
+
   async function ecranFormulaire({ id }) {
     let ev = null;
     if (id) {
@@ -205,51 +223,105 @@
     }
     const apotre = C.estApotre();
     const v = ev || { type: 'programme', date_debut: C.aujourdhuiISO(), eglise_id: apotre ? null : etat.profil.eglise_id };
+    const puce = (nom, valeur, libelle, coche) => `<label class="puce-choix"><input type="radio" name="${nom}" value="${valeur}" ${coche ? 'checked' : ''}><span>${libelle}</span></label>`;
     afficher(`
-      ${C.hero(ev ? 'Modifier le programme' : 'Nouveau programme', { retour: '#/agenda' })}
-      <div class="contenu">
-        <form class="carte" id="form-ev" novalidate>
-          <div class="deux-colonnes">
-            <div class="champ"><label for="e-type">Type</label><select class="saisie" id="e-type">${Object.entries(TYPES).map(([k, n]) => `<option value="${k}" ${v.type === k ? 'selected' : ''}>${n}</option>`).join('')}</select></div>
-            <div class="champ"><label for="e-eglise">Pour</label>
-              ${apotre ? `<select class="saisie" id="e-eglise"><option value="">Toute la CBN</option>${etat.eglises.map((e) => `<option value="${e.id}" ${v.eglise_id === e.id ? 'selected' : ''}>${esc(e.nom)}</option>`).join('')}</select>`
-                       : `<input class="saisie" id="e-eglise" value="${esc(C.nomEglise(etat.profil.eglise_id))}" disabled>`}</div>
-          </div>
+      ${C.hero(ev ? 'Modifier le programme' : 'Nouveau programme', { retour: '#/agenda', sousTitre: 'Il apparaîtra sur la page des fidèles, avec son affiche.' })}
+      <form class="contenu formulaire-moderne" id="form-ev" novalidate>
+        <section class="carte">
+          <h2 class="titre-bloc">${ICONES.image} Affiche du programme <small>facultatif</small></h2>
+          <label class="zone-affiche ${v.affiche_url ? 'remplie' : ''}" for="e-affiche" id="zone-affiche">
+            ${v.affiche_url ? `<img src="${esc(v.affiche_url)}" alt="Affiche actuelle">` : `${ICONES.image}<strong>Ajouter une affiche (flyer)</strong><span class="discret">Photo ou image JPG, PNG</span>`}
+          </label>
+          <input class="visuellement-cache" id="e-affiche" type="file" accept="image/*">
+          ${v.affiche_url ? '<button class="btn lien petit" type="button" id="retirer-affiche">Retirer l’affiche</button>' : ''}
+        </section>
+        <section class="carte">
+          <h2 class="titre-bloc">${ICONES.agenda} Le programme</h2>
+          <div class="champ"><span class="libelle">Type</span><div class="puces-choix">${Object.entries(TYPES).map(([k, n]) => puce('e-type', k, n, v.type === k)).join('')}</div></div>
           <div class="champ"><label for="e-titre">Titre</label><input class="saisie" id="e-titre" value="${esc(v.titre)}" placeholder="Ex. : Veillée de prière, Convention annuelle"></div>
+          <div class="champ"><span class="libelle">Pour</span>
+            ${apotre ? `<div class="puces-choix">${puce('e-eglise', '', 'Toute la CBN', !v.eglise_id)}${etat.eglises.map((e) => puce('e-eglise', e.id, esc(e.nom.replace('CBN ', '')), v.eglise_id === e.id)).join('')}</div>`
+                     : `<p class="valeur-fixe">${esc(C.nomEglise(etat.profil.eglise_id))}</p>`}</div>
+        </section>
+        <section class="carte">
+          <h2 class="titre-bloc">${ICONES.lieu} Quand et où</h2>
           <div class="deux-colonnes">
             <div class="champ"><label for="e-debut">Date de début</label><input class="saisie" id="e-debut" type="date" value="${esc(v.date_debut)}"></div>
-            <div class="champ"><label for="e-fin">Date de fin (facultatif)</label><input class="saisie" id="e-fin" type="date" value="${esc(v.date_fin || '')}"></div>
+            <div class="champ"><label for="e-fin">Date de fin</label><input class="saisie" id="e-fin" type="date" value="${esc(v.date_fin || '')}"></div>
           </div>
           <div class="deux-colonnes">
-            <div class="champ"><label for="e-heure">Heure</label><input class="saisie" id="e-heure" value="${esc(v.heure)}" placeholder="Ex. : 9 h 00"></div>
-            <div class="champ"><label for="e-lieu">Lieu</label><input class="saisie" id="e-lieu" value="${esc(v.lieu)}" placeholder="Ex. : Temple de Mbouda"></div>
+            <div class="champ"><label for="e-heure">Heure</label><input class="saisie" id="e-heure" value="${esc(v.heure)}" placeholder="9 h 00"></div>
+            <div class="champ"><label for="e-lieu">Lieu</label><input class="saisie" id="e-lieu" value="${esc(v.lieu)}" placeholder="Temple de Mbouda"></div>
           </div>
+        </section>
+        <section class="carte">
+          <h2 class="titre-bloc">${ICONES.document} Détails</h2>
           <div class="champ"><label for="e-desc">Description</label><textarea class="saisie" id="e-desc" placeholder="Orateur, thème, contribution, consignes…">${esc(v.description)}</textarea></div>
-          <label class="interrupteur"><input type="checkbox" id="e-ins" ${v.inscriptions ? 'checked' : ''}><span><strong>Inscriptions en ligne</strong><small>Les fidèles s’inscrivent depuis l’application, vous recevez la liste.</small></span></label>
-          <p class="erreur" id="erreur" hidden></p>
-          <button class="btn" type="submit" id="btn-ev">${ICONES.coche} ${ev ? 'Enregistrer' : 'Publier'}</button>
-        </form>
-        ${ev ? '<button class="btn secondaire" id="supprimer">Supprimer ce programme</button>' : ''}
-      </div>`, 'agenda');
+          <label class="interrupteur"><input type="checkbox" role="switch" id="e-ins" ${v.inscriptions ? 'checked' : ''}><span><strong>Inscriptions en ligne</strong><small>Les fidèles s’inscrivent depuis l’application, vous recevez la liste.</small></span></label>
+        </section>
+        <p class="erreur" id="erreur" hidden></p>
+        <button class="btn" type="submit" id="btn-ev">${ICONES.coche} ${ev ? 'Enregistrer' : 'Publier le programme'}</button>
+        ${ev ? '<button class="btn secondaire" type="button" id="supprimer">Supprimer ce programme</button>' : ''}
+      </form>`, 'agenda');
+
+    let affiche = null;          // nouvelle image choisie (Blob)
+    let retirer = false;
+    const zone = document.getElementById('zone-affiche');
+    document.getElementById('e-affiche').onchange = async (e) => {
+      const f = e.target.files[0];
+      if (!f) return;
+      if (!/^image\//.test(f.type)) return toast('Choisissez une image.');
+      try {
+        affiche = await reduireAffiche(f);
+        retirer = false;
+        zone.classList.add('remplie');
+        zone.innerHTML = `<img src="${URL.createObjectURL(affiche)}" alt="Aperçu de l’affiche">`;
+      } catch (err) { toast(err.message); }
+    };
+    const btnRetirer = document.getElementById('retirer-affiche');
+    if (btnRetirer) btnRetirer.onclick = () => {
+      retirer = true; affiche = null;
+      zone.classList.remove('remplie');
+      zone.innerHTML = `${ICONES.image}<strong>Ajouter une affiche (flyer)</strong><span class="discret">Photo ou image JPG, PNG</span>`;
+      btnRetirer.remove();
+    };
 
     document.getElementById('form-ev').onsubmit = async (e) => {
       e.preventDefault();
       const val = (k) => document.getElementById(k).value.trim();
+      const choix = (n) => (document.querySelector(`input[name="${n}"]:checked`) || {}).value;
       const erreur = document.getElementById('erreur');
       const montrer = (m) => { erreur.textContent = m; erreur.hidden = false; };
+      erreur.hidden = true;
       const donnees = {
-        type: val('e-type'), titre: val('e-titre'), date_debut: val('e-debut'), date_fin: val('e-fin') || null,
+        type: choix('e-type') || 'programme', titre: val('e-titre'), date_debut: val('e-debut'), date_fin: val('e-fin') || null,
         heure: val('e-heure'), lieu: val('e-lieu'), description: val('e-desc'), inscriptions: document.getElementById('e-ins').checked,
-        eglise_id: apotre ? (val('e-eglise') || null) : etat.profil.eglise_id
+        eglise_id: apotre ? (choix('e-eglise') || null) : etat.profil.eglise_id
       };
       if (!donnees.titre) return montrer('Indiquez le titre du programme.');
       if (!donnees.date_debut) return montrer('Indiquez la date.');
       if (donnees.date_fin && donnees.date_fin < donnees.date_debut) return montrer('La date de fin est avant la date de début.');
-      document.getElementById('btn-ev').disabled = true;
-      const r = ev ? await sb.from('evenements').update(donnees).eq('id', ev.id) : await sb.from('evenements').insert(donnees);
-      if (r.error) { document.getElementById('btn-ev').disabled = false; return montrer(messageErreur(r.error)); }
-      toast(ev ? 'Programme modifié' : 'Programme publié');
-      aller('/agenda');
+      const btn = document.getElementById('btn-ev');
+      btn.disabled = true;
+      try {
+        if (affiche) {
+          btn.textContent = 'Envoi de l’affiche…';
+          const chemin = `${donnees.eglise_id || 'general'}/${Date.now()}.jpg`;
+          const up = await sb.storage.from('affiches').upload(chemin, affiche, { contentType: 'image/jpeg', cacheControl: '31536000' });
+          if (up.error) throw up.error;
+          donnees.affiche_url = sb.storage.from('affiches').getPublicUrl(chemin).data.publicUrl;
+        } else if (retirer) {
+          donnees.affiche_url = null;
+        }
+        btn.textContent = 'Enregistrement…';
+        const r = ev ? await sb.from('evenements').update(donnees).eq('id', ev.id) : await sb.from('evenements').insert(donnees);
+        if (r.error) throw r.error;
+        toast(ev ? 'Programme modifié' : 'Programme publié');
+        aller('/agenda');
+      } catch (err) {
+        btn.disabled = false; btn.innerHTML = ICONES.coche + ' Réessayer';
+        montrer(messageErreur(err));
+      }
     };
     C.boutonConfirme(document.getElementById('supprimer'), async () => {
       const r = await sb.from('evenements').delete().eq('id', ev.id);
