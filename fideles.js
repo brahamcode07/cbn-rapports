@@ -141,11 +141,13 @@
 
   async function ecranAccueil() {
     const auj = C.aujourdhuiISO();
-    const [, med, preds, evs] = await Promise.all([
+    const [, med, preds, evs, resp, params] = await Promise.all([
       eglisesPubliques(),
       sb.from('meditations').select('id, date_med, titre').eq('date_med', auj).maybeSingle(),
       sb.from('predications').select('*').order('date_pred', { ascending: false }).order('created_at', { ascending: false }).limit(3),
-      sb.from('evenements').select('*').or(`date_fin.gte.${auj},and(date_fin.is.null,date_debut.gte.${auj})`).order('date_debut').limit(4)
+      sb.from('evenements').select('*').or(`date_fin.gte.${auj},and(date_fin.is.null,date_debut.gte.${auj})`).order('date_debut').limit(4),
+      C.chargerResponsables().catch(() => []),
+      C.chargerParametres().catch(() => ({}))
     ]);
     const erreur = preds.error || evs.error;
     afficher(`
@@ -176,11 +178,13 @@
           </a>`).join('')}</div>` : '<p class="vide">Aucun programme à venir pour le moment.</p>'}
         <div class="entete-section"><h2 class="titre-section">Dernières prédications</h2><a href="#/predications">Tout voir</a></div>
         <div class="liste">${(preds.data || []).length ? preds.data.map(lignePredication).join('') : '<p class="vide">Les prédications à écouter apparaîtront ici.</p>'}</div>
+        ${C.rangeeResponsables(resp)}
         <section class="carte appel-priere">
           <div class="icone-ligne grande">${ICONES.priere}</div>
           <div><h2>Besoin de prière ?</h2><p class="discret">Confiez-nous votre sujet de prière ou posez une question à l’apôtre. Vous pouvez rester anonyme.</p></div>
           <a class="btn" href="#/priere">Envoyer une demande</a>
         </section>
+        ${C.blocSuivezNous(params)}
         <p class="discret pied">Cité de la Bonne Nouvelle</p>
       </div>`, 'accueil', 'fideles');
     C.remplirVersets();

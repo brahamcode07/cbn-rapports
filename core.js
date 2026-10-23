@@ -21,6 +21,9 @@
 
   const svg = (d, taille = 20, ep = 2) => `<svg width="${taille}" height="${taille}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${ep}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
   const ICONES = {
+    message: svg('<path d="M20.5 11.5a8.5 8.5 0 0 1-12.6 7.4L3.5 20l1.2-4.2A8.5 8.5 0 1 1 20.5 11.5z"/>', 20, 1.8),
+    whatsapp: svg('<path d="M20.5 11.5a8.5 8.5 0 0 1-12.6 7.4L3.5 20l1.2-4.2A8.5 8.5 0 1 1 20.5 11.5z"/>', 20, 1.8),
+    facebook: svg('<path d="M14 8h3V4h-3a4 4 0 0 0-4 4v2.5H7.5v4H10V21h4v-6.5h3l.5-4H14V8.5c0-.3.2-.5.5-.5z"/>', 20, 1.8),
     lieu: svg('<path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>'),
     retour: svg('<path d="M15 18l-6-6 6-6"/>'),
     suivant: svg('<path d="M9 18l6-6-6-6"/>'),
@@ -260,7 +263,10 @@
   function afficher(html, onglet, espace) {
     const fideles = espace === 'fideles';
     const avecOnglets = Boolean(onglet && (fideles || etat.profil));
-    app.innerHTML = html + (avecOnglets ? (fideles ? barreFideles(onglet) : barreOnglets(onglet)) : '');
+    const bandeau = fideles && etat.profil
+      ? `<div class="bandeau-fideles">${ICONES.globe}<span>Vous voyez l’espace fidèles</span><a href="#/">Retour à mon espace</a></div>` : '';
+    app.innerHTML = bandeau + html + (avecOnglets ? (fideles ? barreFideles(onglet) : barreOnglets(onglet)) : '');
+    document.body.classList.toggle('avec-bandeau', Boolean(bandeau));
     document.body.classList.toggle('avec-onglets', avecOnglets);
     window.scrollTo(0, 0);
     ajouterYeux(app);
@@ -293,7 +299,7 @@
 
   // ----- Barre de navigation de l'espace fidèles -----
   function barreFideles(actif) {
-    const onglets = [['accueil', '#/', 'Accueil', ICONES.accueil], ['predications', '#/predications', 'Prédications', ICONES.ecouter],
+    const onglets = [['accueil', etat.profil ? '#/fideles' : '#/', 'Accueil', ICONES.accueil], ['predications', '#/predications', 'Prédications', ICONES.ecouter],
       ['parole', '#/parole', 'Parole', ICONES.livre], ['programmes', '#/programmes', 'Programmes', ICONES.agenda],
       ['priere', '#/priere', 'Prière', ICONES.priere]];
     return `<nav class="onglets" aria-label="Navigation de l’espace fidèles">${onglets.map(([cle, lien, nom, icone]) =>
@@ -302,6 +308,7 @@
 
   // ----- Barre de navigation en bas -----
   function estApotre() { return Boolean(etat.profil && ['apotre', 'admin'].includes(etat.profil.role)); }
+  function peutGererSite() { return Boolean(etat.profil && (estApotre() || etat.profil.admin_contenu)); }
   function barreOnglets(actif) {
     const onglets = estApotre()
       ? [['rapports', '#/', 'Accueil', ICONES.accueil], ['stats', '#/stats', 'Statistiques', ICONES.stats],
@@ -389,6 +396,17 @@
 
   async function router() {
     const chemin = location.hash.replace(/^#/, '') || '/';
+    // Pages publiques ouvertes directement : reconnaître discrètement une personne déjà connectée
+    if (!etat.profil && !etat.sessionVerifiee) {
+      etat.sessionVerifiee = true;
+      try {
+        const { data: s } = await sb.auth.getSession();
+        if (s.session) {
+          const { data: p } = await sb.from('profils').select('*, eglises(nom)').eq('id', s.session.user.id).maybeSingle();
+          if (p) etat.profil = p;
+        }
+      } catch (e) { /* hors connexion : on continue sans profil */ }
+    }
     for (const r of routes.filter((x) => x.public)) {
       const m = chemin.match(r.motif);
       if (m) {
@@ -658,7 +676,8 @@
       ligne('#/demandes', ICONES.priere, apotre ? 'Prières et questions' : 'Demandes de prière', apotre ? 'Envoyées par les fidèles' : 'Envoyées par les fidèles de votre église', demandes),
       ligne('#/gerer/predications', ICONES.ecouter, 'Prédications', 'Ajouter des messages audio ou vidéo'),
       apotre ? ligne('#/gerer/meditations', ICONES.livre, 'Méditations du jour', 'Écrire et programmer les méditations') : '',
-      ligne('#/fideles', ICONES.globe, 'Voir l’espace fidèles', 'Ce que voient les fidèles, sans compte')
+      peutGererSite() ? ligne('#/gerer/responsables', ICONES.groupe, 'Responsables et liens', 'Apôtre, pasteurs, photos, contacts, page Facebook') : '',
+      ligne('#/ma-fiche', ICONES.profil, 'Ma fiche publique', 'Photo, présentation et contact vus par les fidèles')
     ];
     afficher(`
       <div class="hero">
@@ -669,7 +688,8 @@
         <h1>Plus</h1>
       </div>
       <div class="contenu">
-        <h2 class="titre-section" style="margin-top:0">Gestion</h2>
+        <a class="carte bascule-fideles" href="#/fideles"><span class="icone-ligne">${ICONES.globe}</span><span class="corps"><strong>Voir l’espace fidèles</strong><span>L’application comme la voient les chrétiens, sans vous déconnecter</span></span>${ICONES.suivant}</a>
+        <h2 class="titre-section">Gestion</h2>
         <div class="liste">${gestion.join('')}</div>
         <h2 class="titre-section">Espace fidèles</h2>
         <div class="liste">${fideles.join('')}</div>
@@ -838,7 +858,7 @@
     sb, etat, CFG, ICONES, esc, nombre, fcfa, initiales, toast, messageErreur,
     telephoneLisible, telephoneInternational, aujourdhuiISO, versDate, versISO, ajouterJours, ecartJours,
     dimancheDeReference, dateLongue, dateCourte, dateJour, heure, moisCourant, ajouterMois, moisLibelle, moisCourt, finDeMois,
-    avatarHTML, lienProfil, logoRond, hero, cloche, majCloche, boutonConfirme, afficher, estApotre, chargerEglisesEtPasteurs, nomEglise,
+    avatarHTML, lienProfil, logoRond, hero, cloche, majCloche, boutonConfirme, afficher, estApotre, peutGererSite, chargerEglisesEtPasteurs, nomEglise,
     egliseDe, peutEcrire, peutPublier, prefixe, entetePDF, route, aller, router, deconnexion, demarrer,
     boutonTheme, estSombre, fileAttente, mettreEnAttente, envoyerFileAttente, estErreurReseau,
     anniversairesProches, lienWhatsApp

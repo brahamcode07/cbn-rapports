@@ -1,9 +1,9 @@
 // CBN — fonctionne hors connexion (l'application s'ouvre même sans réseau)
 // et reçoit les notifications sur le téléphone.
 // Les données (rapports, membres…) viennent toujours d'Internet, jamais du cache.
-const VERSION = 'cbn-v6';
+const VERSION = 'cbn-v7';
 const FICHIERS = [
-  './', 'index.html', 'style.css', 'config.js', 'core.js', 'rapports.js', 'eglise.js', 'fideles.js', 'plan-versets.js', 'parole.js', 'agenda.js',
+  './', 'index.html', 'style.css', 'config.js', 'core.js', 'rapports.js', 'eglise.js', 'fideles.js', 'plan-versets.js', 'parole.js', 'responsables.js', 'agenda.js',
   'manifest.webmanifest', 'icon-192.png', 'icon-512.png'
 ];
 // Bibliothèques et polices venant d'autres sites : gardées pour l'usage hors connexion

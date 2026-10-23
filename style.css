@@ -687,3 +687,61 @@ h1, h2, h3, .grand-titre, .profil-nom, .titre-section { letter-spacing: -0.02em;
 .hero .hero-ligne .marque > span:not(.logo-rond) { min-width: 0; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; font-size: 11px; }
 .hero .hero-identite { display: flex; align-items: center; gap: 8px; flex: none; }
 .accueil-hero .marque > span:not(.logo-rond) { display: none; }
+
+/* =====================================================================
+   Version 5 : responsables, leaders, Facebook, bascule espace fidèles
+   ===================================================================== */
+.aide { margin: 4px 0 0; font-size: 13px; color: var(--gris); }
+
+/* Bandeau quand un pasteur regarde l'espace fidèles */
+.bandeau-fideles { position: sticky; top: 0; z-index: 30; display: flex; align-items: center; gap: 8px; padding: 8px 16px; padding-top: calc(env(safe-area-inset-top, 0px) + 8px);
+  background: var(--or); color: var(--violet-nuit); font-size: 14px; font-weight: 600; }
+.bandeau-fideles svg { width: 18px; height: 18px; flex: none; }
+.bandeau-fideles span { flex: 1; min-width: 0; }
+.bandeau-fideles a { color: var(--violet-nuit); font-weight: 800; white-space: nowrap; }
+.bascule-fideles { flex-direction: row; align-items: center; gap: 14px; text-decoration: none; color: var(--encre); border: 1.5px solid var(--or); }
+.bascule-fideles .corps { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.bascule-fideles .corps span { font-size: 13.5px; color: var(--gris); }
+
+/* Avatars de tailles variées */
+.avatar.moyen { width: 64px; height: 64px; font-size: 20px; }
+.avatar.grand { width: 72px; height: 72px; font-size: 22px; }
+.avatar.tres-grand { width: 112px; height: 112px; font-size: 34px; }
+
+/* Rangée de responsables sur l'accueil */
+.rangee-responsables { display: flex; gap: 14px; overflow-x: auto; padding: 2px 2px 8px; margin: 0 -2px; scroll-snap-type: x mandatory; }
+.mini-responsable { flex: none; width: 92px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 6px; text-decoration: none; color: var(--encre); scroll-snap-align: start; }
+.mini-responsable strong { font-size: 13.5px; line-height: 1.25; }
+.mini-responsable span { font-size: 12px; color: var(--envoye-texte); font-weight: 700; }
+
+/* Fiche d'un responsable */
+.responsable { gap: 12px; }
+.responsable-tete { display: flex; align-items: center; gap: 14px; }
+.responsable-nom { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.responsable-nom small { font-size: 12px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: var(--envoye-texte); }
+.responsable-nom strong { font-size: 19px; letter-spacing: -0.01em; }
+.responsable-nom span { font-size: 14px; color: var(--gris); }
+.actions-contact { display: flex; gap: 8px; flex-wrap: wrap; }
+.actions-contact .btn { flex: 1; min-width: 130px; }
+.btn.whatsapp { background: #1F8B4C; border-color: #1F8B4C; color: #fff; }
+.bouton-rond.petit { width: 38px; height: 38px; background: var(--violet-pale); color: var(--accent); border: 0; }
+.bouton-rond.petit.whatsapp { background: #E3F4EA; color: #1F8B4C; }
+.bouton-rond.petit svg { width: 18px; height: 18px; }
+.liste-leaders { display: flex; flex-direction: column; gap: 10px; }
+.leader { display: flex; align-items: center; gap: 12px; }
+.leader .avatar { width: 44px; height: 44px; font-size: 15px; background: var(--violet-pale); color: var(--accent); border: 0; }
+.leader .corps { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.leader .corps span { font-size: 13px; color: var(--gris); }
+.contacts-mini { display: flex; gap: 6px; }
+
+/* Formulaire : photo */
+.photo-fiche { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+.photo-actions { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
+.bloc-leader { display: flex; flex-direction: column; gap: 10px; padding: 12px; border-radius: 14px; border: 1.5px dashed var(--pointille); }
+
+/* Facebook */
+.suivez-nous { flex-direction: row; align-items: center; gap: 14px; text-decoration: none; color: var(--encre); }
+.suivez-nous .icone-facebook { width: 46px; height: 46px; border-radius: 50%; background: #1877F2; color: #fff; display: flex; align-items: center; justify-content: center; flex: none; }
+.suivez-nous .icone-facebook svg { width: 24px; height: 24px; fill: #fff; stroke: none; }
+.suivez-nous .corps { flex: 1; display: flex; flex-direction: column; }
+.suivez-nous small { color: var(--gris); font-size: 13px; }

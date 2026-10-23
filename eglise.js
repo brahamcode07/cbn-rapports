@@ -135,6 +135,12 @@
           <div class="champ"><label for="m-arrivee">Arrivée à l’église</label><input class="saisie" id="m-arrivee" type="date" value="${esc(v.date_arrivee || '')}"></div>
         </div>
         <div class="champ"><label for="m-naissance">Date de naissance <span class="discret">(pour souhaiter l’anniversaire)</span></label><input class="saisie" id="m-naissance" type="date" max="${C.aujourdhuiISO()}" value="${esc(v.date_naissance || '')}"></div>
+        <div class="bloc-leader">
+          <div class="champ"><label for="m-leader">Leader <span class="discret">(affiché aux fidèles dans « Nos responsables »)</span></label>
+            <input class="saisie" id="m-leader" list="roles-leader" value="${esc(v.role_leader || '')}" placeholder="Pas leader — ou choisissez un rôle" autocomplete="off">
+            <datalist id="roles-leader">${(C.ROLES_LEADER || []).map((r) => `<option value="${esc(r)}">`).join('')}</datalist></div>
+          <label class="interrupteur"><input type="checkbox" role="switch" id="m-leader-public" ${v.leader_public ? 'checked' : ''}><span><strong>Afficher son numéro aux fidèles</strong><small>Avec son accord : les fidèles pourront l’appeler ou lui écrire sur WhatsApp.</small></span></label>
+        </div>
         <div class="champ"><label for="m-formations">Formations suivies</label><textarea class="saisie" id="m-formations" placeholder="Ex. : école de baptême, formation des ouvriers…">${esc(v.formations)}</textarea></div>
         <div class="champ"><label for="m-notes">Notes</label><textarea class="saisie" id="m-notes">${esc(v.notes)}</textarea></div>
         <p class="erreur" id="erreur" hidden></p>
@@ -148,7 +154,8 @@
     return {
       nom: val('m-nom'), telephone: tel ? C.telephoneInternational(tel) : '', sexe: val('m-sexe') || null, statut: val('m-statut'),
       departement_id: val('m-dep') || null, date_arrivee: val('m-arrivee') || null, date_naissance: val('m-naissance') || null,
-      formations: val('m-formations'), notes: val('m-notes')
+      formations: val('m-formations'), notes: val('m-notes'),
+      role_leader: val('m-leader') || null, leader_public: document.getElementById('m-leader-public').checked
     };
   }
 
@@ -204,6 +211,7 @@
           <div class="paire"><span>Sexe</span><strong>${m.sexe === 'H' ? 'Homme' : m.sexe === 'F' ? 'Femme' : '—'}</strong></div>
           <div class="paire"><span>Département</span><strong>${esc(m.departements ? m.departements.nom : '—')}</strong></div>
           <div class="paire"><span>Arrivée à l’église</span><strong>${m.date_arrivee ? esc(C.dateLongue(m.date_arrivee)) : '—'}</strong></div>
+          ${m.role_leader ? `<div class="paire"><span>Leader</span><strong>${esc(m.role_leader)}${m.leader_public ? ' · numéro visible' : ''}</strong></div>` : ''}
           <div class="paire"><span>Anniversaire</span><strong>${m.date_naissance ? esc(C.dateCourte(m.date_naissance)) : '—'}</strong></div>
         </section>
         ${m.formations ? `<section class="carte"><h2 class="petit-titre">Formations suivies</h2><p class="texte-libre">${esc(m.formations)}</p></section>` : ''}
